@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI PROOF | Admin Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0a0a0f',
+                        secondary: '#14141f',
+                        accent: '#6366f1',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        gold: '#f59e0b',
+                        purple: '#8b5cf6',
+                        pink: '#ec4899'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Chart.js для графіків -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Шрифти -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: white;
+        }
+        
+        .glass-card {
+            background: rgba(20, 20, 31, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 1rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(20,20,31,0.8) 0%, rgba(10,10,15,0.8) 100%);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            border-color: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99,102,241,0.2);
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table th {
+            text-align: left;
+            padding: 1rem;
+            background: rgba(99,102,241,0.1);
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .admin-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .admin-table tr:hover {
+            background: rgba(99,102,241,0.05);
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: rgba(16,185,129,0.1);
+            color: #10b981;
+            border: 1px solid rgba(16,185,129,0.3);
+        }
+        
+        .status-warning {
+            background: rgba(245,158,11,0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245,158,11,0.3);
+        }
+        
+        .status-danger {
+            background: rgba(239,68,68,0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239,68,68,0.3);
+        }
+        
+        .status-info {
+            background: rgba(99,102,241,0.1);
+            color: #6366f1;
+            border: 1px solid rgba(99,102,241,0.3);
+        }
+        
+        /* Стилі для графіків */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Стилі для скролбару */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #14141f;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 4px;
+        }
+        
+        /* Стилі для прапорців */
+        .country-flag {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== АДМІН-ПАНЕЛЬ ========== -->
+<div class="min-h-screen flex">
+    
+    <!-- Сайдбар -->
+    <div class="w-64 bg-secondary border-r border-gray-800 p-6 fixed h-full">
+        <div class="flex items-center space-x-3 mb-8">
+            <div class="w-10 h-10 bg-gradient-to-r from-accent to-purple rounded-lg flex items-center justify-center">
+                <span class="font-bold text-xl">AI</span>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold">AI<span class="text-accent">PROOF</span></h1>
+                <p class="text-xs text-gray-400">Admin Panel</p>
+            </div>
+        </div>
+        
+        <nav class="space-y-2">
+            <a href="#" class="dashboard-link flex items-center space-x-3 px-4 py-3 bg-accent/10 rounded-lg text-accent" data-section="dashboard">
+                <i class="fas fa-chart-pie w-5"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="dashboard-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition" data-section="countries">
+                <i class="fas fa-globe w-5 text-gray-400"></i>
+                <span>Аналітика по країнах</span>
+            </a>
+            <a href="#" class="dashboard-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition" data-section="users">
+                <i class="fas fa-users w-5 text-gray-400"></i>
+                <span>Користувачі</span>
+            </a>
+            <a href="#" class="dashboard-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition" data-section="payments">
+                <i class="fas fa-credit-card w-5 text-gray-400"></i>
+                <span>Платежі</span>
+            </a>
+            <a href="#" class="dashboard-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition" data-section="prices">
+                <i class="fas fa-tags w-5 text-gray-400"></i>
+                <span>Керування цінами</span>
+            </a>
+            <a href="#" class="dashboard-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition" data-section="support">
+                <i class="fas fa-heart w-5 text-pink-500"></i>
+                <span>Відділ турботи</span>
+                <span class="ml-auto bg-pink-500/20 text-pink-500 text-xs px-2 py-1 rounded-full" id="supportBadge">0</span>
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-6 w-52">
+            <div class="border-t border-gray-800 pt-4">
+                <div class="flex items-center space-x-3 px-4 py-3">
+                    <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">Admin</p>
+                        <p class="text-xs text-gray-400">Власник</p>
+                    </div>
+                    <i class="fas fa-sign-out-alt text-gray-400 ml-auto cursor-pointer hover:text-white" id="logoutBtn"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Основний контент -->
+    <div class="flex-1 ml-64 overflow-auto">
+        
+        <!-- Шапка -->
+        <header class="glass-card m-6 p-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold" id="dashboardTitle">Dashboard</h2>
+                    <p class="text-gray-400" id="dashboardSubtitle">Ось що відбувається з вашим бізнесом сьогодні</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <i class="fas fa-bell text-gray-400 text-xl cursor-pointer hover:text-white"></i>
+                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-pink-500 rounded-full text-xs flex items-center justify-center" id="notificationBadge">0</span>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-400" id="currentDate"></p>
+                        <p class="text-xs text-gray-500" id="currentTime"></p>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- ========== СЕКЦІЯ DASHBOARD (ГОЛОВНА) ========== -->
+        <div id="section-dashboard" class="section active">
+            
+            <!-- Статистика (верхні картки) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mx-6 mb-6">
+                <div class="stat-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-dollar-sign text-accent text-xl"></i>
+                        </div>
+                        <span class="text-xs text-success" id="revenueGrowth">+12.5%</span>
+                    </div>
+                    <p class="text-2xl font-bold" id="totalRevenue">$0</p>
+                    <p class="text-sm text-gray-400">Загальний дохід</p>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 bg-purple/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-purple text-xl"></i>
+                        </div>
+                        <span class="text-xs text-success" id="usersGrowth">+5.2%</span>
+                    </div>
+                    <p class="text-2xl font-bold" id="totalUsers">0</p>
+                    <p class="text-sm text-gray-400">Користувачів</p>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 bg-gold/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-gold text-xl"></i>
+                        </div>
+                        <span class="text-xs text-success" id="conversionGrowth">+8.3%</span>
+                    </div>
+                    <p class="text-2xl font-bold" id="totalConversions">0%</p>
+                    <p class="text-sm text-gray-400">Конверсія</p>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-heart text-pink-500 text-xl"></i>
+                        </div>
+                        <span class="text-xs text-success" id="retentionGrowth">+3.1%</span>
+                    </div>
+                    <p class="text-2xl font-bold" id="userRetention">0%</p>
+                    <p class="text-sm text-gray-400">Повернення</p>
+                </div>
+            </div>
+            
+            <!-- Графіки -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-6 mb-6">
+                <div class="glass-card p-6">
+                    <h3 class="text-lg font-bold mb-4">Конверсія по країнах</h3>
+                    <div class="chart-container">
+                        <canvas id="conversionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-6">
+                    <h3 class="text-lg font-bold mb-4">Дохід по країнах</h3>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Теплова карта Європи (текстова) -->
+            <div class="glass-card mx-6 mb-6 p-6">
+                <h3 class="text-lg font-bold mb-4">🇪🇺 Теплова карта Європи</h3>
+                <div class="grid grid-cols-5 gap-2 text-center">
+                    <div class="bg-green-900/30 p-3 rounded-lg">
+                        <span class="text-2xl mb-1">🇺🇦</span>
+                        <div class="font-bold" id="heatUA">0</div>
+                        <div class="text-xs text-gray-400">відвідувань</div>
+                    </div>
+                    <div class="bg-green-800/30 p-3 rounded-lg">
+                        <span class="text-2xl mb-1">🇵🇱</span>
+                        <div class="font-bold" id="heatPL">0</div>
+                        <div class="text-xs text-gray-400">відвідувань</div>
+                    </div>
+                    <div class="bg-yellow-900/30 p-3 rounded-lg">
+                        <span class="text-2xl mb-1">🇩🇪</span>
+                        <div class="font-bold" id="heatDE">0</div>
+                        <div class="text-xs text-gray-400">відвідувань</div>
+                    </div>
+                    <div class="bg-orange-900/30 p-3 rounded-lg">
+                        <span class="text-2xl mb-1">🇫🇷</span>
+                        <div class="font-bold" id="heatFR">0</div>
+                        <div class="text-xs text-gray-400">відвідувань</div>
+                    </div>
+                    <div class="bg-blue-900/30 p-3 rounded-lg">
+                        <span class="text-2xl mb-1">🇬🇧</span>
+                        <div class="font-bold" id="heatGB">0</div>
+                        <div class="text-xs text-gray-400">відвідувань</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- ========== СЕКЦІЯ АНАЛІТИКА ПО КРАЇНАХ ========== -->
+        <div id="section-countries" class="section hidden">
+            
+            <!-- Фільтри -->
+            <div class="glass-card mx-6 mb-6 p-6">
+                <div class="flex flex-wrap gap-4 items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold">Детальна аналітика по країнах</h3>
+                        <p class="text-sm text-gray-400">Всі метрики для 5 європейських країн</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <select id="analyticsPeriod" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm">
+                            <option value="7">Останні 7 днів</option>
+                            <option value="30" selected>Останні 30 днів</option>
+                            <option value="90">Останні 90 днів</option>
+                            <option value="365">Останній рік</option>
+                        </select>
+                        <button id="refreshAnalytics" class="bg-accent hover:bg-blue-600 px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-sync-alt mr-2"></i>Оновити
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Картки з загальною статистикою -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mx-6 mb-6">
+                <div class="bg-gray-900 p-4 rounded-xl text-center">
+                    <p class="text-sm text-gray-400">Всього візитів</p>
+                    <p class="text-2xl font-bold" id="totalVisits">0</p>
+                </div>
+                <div class="bg-gray-900 p-4 rounded-xl text-center">
+                    <p class="text-sm text-gray-400">Аналізів</p>
+                    <p class="text-2xl font-bold" id="totalAnalyses">0</p>
+                </div>
+                <div class="bg-gray-900 p-4 rounded-xl text-center">
+                    <p class="text-sm text-gray-400">Реєстрацій</p>
+                    <p class="text-2xl font-bold" id="totalRegistrations">0</p>
+                </div>
+                <div class="bg-gray-900 p-4 rounded-xl text-center">
+                    <p class="text-sm text-gray-400">Покупок</p>
+                    <p class="text-2xl font-bold" id="totalPurchases">0</p>
+                </div>
+                <div class="bg-gray-900 p-4 rounded-xl text-center">
+                    <p class="text-sm text-gray-400">Дохід</p>
+                    <p class="text-2xl font-bold" id="totalRevenueCountries">$0</p>
+                </div>
+            </div>
+            
+            <!-- Таблиця по країнах -->
+            <div class="glass-card mx-6 mb-6 p-6">
+                <div class="overflow-x-auto">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Країна</th>
+                                <th>Прапор</th>
+                                <th>Візити</th>
+                                <th>Аналізи</th>
+                                <th>CTR</th>
+                                <th>Реєстрації</th>
+                                <th>Покупки</th>
+                                <th>Конверсія</th>
+                                <th>Дохід</th>
+                                <th>Середній час</th>
+                                <th>Повернення</th>
+                                <th>Час до оплати</th>
+                            </tr>
+                        </thead>
+                        <tbody id="countriesTable">
+                            <!-- Дані завантажуються динамічно -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Графіки по країнах -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-6 mb-6">
+                <div class="glass-card p-6">
+                    <h3 class="text-lg font-bold mb-4">CTR по країнах</h3>
+                    <div class="chart-container">
+                        <canvas id="ctrChart"></canvas>
+                    </div>
+                </div>
+                <div class="glass-card p-6">
+                    <h3 class="text-lg font-bold mb-4">Конверсія по країнах</h3>
+                    <div class="chart-container">
+                        <canvas id="conversionByCountryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- ========== ІНШІ СЕКЦІЇ (КОРОТКО) ========== -->
+        
+        <!-- Користувачі -->
+        <div id="section-users" class="section hidden">
+            <div class="glass-card mx-6 p-6">
+                <h3 class="text-lg font-bold mb-4">Користувачі</h3>
+                <p class="text-gray-400">Тут буде список користувачів</p>
+            </div>
+        </div>
+        
+        <!-- Платежі -->
+        <div id="section-payments" class="section hidden">
+            <div class="glass-card mx-6 p-6">
+                <h3 class="text-lg font-bold mb-4">Платежі</h3>
+                <p class="text-gray-400">Тут буде історія платежів</p>
+            </div>
+        </div>
+        
+        <!-- Керування цінами -->
+        <div id="section-prices" class="section hidden">
+            <div class="glass-card mx-6 p-6">
+                <h3 class="text-lg font-bold mb-4">Керування цінами</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-900 p-4 rounded-xl">
+                        <label class="block text-sm font-medium mb-2">Basic ($)</label>
+                        <input type="number" id="priceBasic" value="49" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2">
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl">
+                        <label class="block text-sm font-medium mb-2">Business ($)</label>
+                        <input type="number" id="priceBusiness" value="149" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2">
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl">
+                        <label class="block text-sm font-medium mb-2">Enterprise ($)</label>
+                        <input type="number" id="priceEnterprise" value="499" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2">
+                    </div>
+                </div>
+                <button class="mt-4 bg-accent hover:bg-blue-600 px-4 py-2 rounded-lg" id="savePrices">Зберегти ціни</button>
+            </div>
+        </div>
+        
+        <!-- Відділ турботи -->
+        <div id="section-support" class="section hidden">
+            <div class="glass-card mx-6 p-6">
+                <h3 class="text-lg font-bold mb-4">Відділ турботи</h3>
+                <p class="text-gray-400">Тут будуть звернення клієнтів</p>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+    // ========== ПОТОЧНИЙ ЧАС ==========
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('uk-UA', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+        });
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('uk-UA');
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+    
+    // ========== НАВІГАЦІЯ ПО СЕКЦІЯХ ==========
+    document.querySelectorAll('.dashboard-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const section = this.dataset.section;
+            
+            // Оновлюємо активний клас
+            document.querySelectorAll('.dashboard-link').forEach(l => {
+                l.classList.remove('bg-accent/10', 'text-accent');
+                l.classList.add('hover:bg-gray-800');
+            });
+            this.classList.add('bg-accent/10', 'text-accent');
+            
+            // Показуємо потрібну секцію
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.add('hidden');
+            });
+            document.getElementById(`section-${section}`).classList.remove('hidden');
+            
+            // Оновлюємо заголовок
+            const titles = {
+                'dashboard': 'Dashboard',
+                'countries': 'Аналітика по країнах',
+                'users': 'Користувачі',
+                'payments': 'Платежі',
+                'prices': 'Керування цінами',
+                'support': 'Відділ турботи'
+            };
+            document.getElementById('dashboardTitle').textContent = titles[section];
+        });
+    });
+    
+    // ========== ФУНКЦІЇ ДЛЯ АНАЛІТИКИ ==========
+    
+    // Функція для отримання назви країни
+    function getCountryName(code) {
+        const countries = {
+            'UA': 'Україна',
+            'PL': 'Польща',
+            'DE': 'Німеччина',
+            'FR': 'Франція',
+            'GB': 'Великобританія',
+            'unknown': 'Невідомо'
+        };
+        return countries[code] || code;
+    }
+    
+    // Функція для отримання прапорця
+    function getFlagEmoji(code) {
+        const flags = {
+            'UA': '🇺🇦',
+            'PL': '🇵🇱',
+            'DE': '🇩🇪',
+            'FR': '🇫🇷',
+            'GB': '🇬🇧',
+            'unknown': '🌍'
+        };
+        return flags[code] || '🏳️';
+    }
+    
+    // Аналіз даних по країнах
+    function analyzeCountryData() {
+        // Отримуємо дані з localStorage
+        const events = JSON.parse(localStorage.getItem('analyticsEvents') || '[]');
+        const visits = JSON.parse(localStorage.getItem('userVisits') || '[]');
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        
+        const period = parseInt(document.getElementById('analyticsPeriod')?.value || '30');
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - period);
+        
+        // Фільтруємо події за період
+        const filteredEvents = events.filter(e => new Date(e.timestamp) >= cutoffDate);
+        const filteredVisits = visits.filter(v => new Date(v.timestamp) >= cutoffDate);
+        
+        // Групуємо по країнах
+        const countryStats = {};
+        const countries = ['UA', 'PL', 'DE', 'FR', 'GB', 'unknown'];
+        
+        countries.forEach(code => {
+            countryStats[code] = {
+                visits: 0,
+                analyses: 0,
+                registrations: 0,
+                purchases: 0,
+                revenue: 0,
+                totalTime: 0,
+                returningUsers: new Set(),
+                firstTimeUsers: new Set(),
+                firstPurchaseTime: []
+            };
+        });
+        
+        // Аналізуємо візити
+        filteredVisits.forEach(visit => {
+            const country = visit.country || 'unknown';
+            if (countryStats[country]) {
+                countryStats[country].visits++;
+                countryStats[country].firstTimeUsers.add(visit.userId || 'guest');
+            }
+        });
+        
+        // Аналізуємо події
+        filteredEvents.forEach(event => {
+            const country = event.country || 'unknown';
+            if (!countryStats[country]) return;
+            
+            if (event.type === 'analysis') {
+                countryStats[country].analyses++;
+            } else if (event.type === 'registration') {
+                countryStats[country].registrations++;
+            } else if (event.type === 'purchase') {
+                countryStats[country].purchases++;
+                countryStats[country].revenue += event.amount || 0;
+            }
+        });
+        
+        // Розраховуємо метрики
+        let totalVisits = 0, totalAnalyses = 0, totalRegistrations = 0, totalPurchases = 0, totalRevenue = 0;
+        
+        Object.keys(countryStats).forEach(code => {
+            const stat = countryStats[code];
+            totalVisits += stat.visits;
+            totalAnalyses += stat.analyses;
+            totalRegistrations += stat.registrations;
+            totalPurchases += stat.purchases;
+            totalRevenue += stat.revenue;
+        });
+        
+        // Оновлюємо загальну статистику
+        document.getElementById('totalVisits').textContent = totalVisits;
+        document.getElementById('totalAnalyses').textContent = totalAnalyses;
+        document.getElementById('totalRegistrations').textContent = totalRegistrations;
+        document.getElementById('totalPurchases').textContent = totalPurchases;
+        document.getElementById('totalRevenueCountries').textContent = `$${totalRevenue}`;
+        
+        // Оновлюємо теплову карту
+        document.getElementById('heatUA').textContent = countryStats['UA']?.visits || 0;
+        document.getElementById('heatPL').textContent = countryStats['PL']?.visits || 0;
+        document.getElementById('heatDE').textContent = countryStats['DE']?.visits || 0;
+        document.getElementById('heatFR').textContent = countryStats['FR']?.visits || 0;
+        document.getElementById('heatGB').textContent = countryStats['GB']?.visits || 0;
+        
+        // Оновлюємо таблицю
+        renderCountriesTable(countryStats);
+        
+        // Оновлюємо графіки
+        updateCharts(countryStats);
+    }
+    
+    // Відображення таблиці
+    function renderCountriesTable(stats) {
+        const tbody = document.getElementById('countriesTable');
+        if (!tbody) return;
+        
+        const countries = ['UA', 'PL', 'DE', 'FR', 'GB'];
+        let html = '';
+        
+        countries.forEach(code => {
+            const stat = stats[code] || { visits: 0, analyses: 0, registrations: 0, purchases: 0, revenue: 0 };
+            
+            const ctr = stat.visits > 0 ? ((stat.analyses / stat.visits) * 100).toFixed(2) : 0;
+            const conversion = stat.registrations > 0 ? ((stat.purchases / stat.registrations) * 100).toFixed(2) : 0;
+            const avgTime = Math.floor(Math.random() * 180 + 60); // Демо-дані
+            const returning = Math.floor(Math.random() * 30 + 10); // Демо-дані
+            const timeToPay = Math.floor(Math.random() * 24 + 1); // Демо-дані
+            
+            const ctrClass = ctr > 10 ? 'status-active' : (ctr > 5 ? 'status-warning' : 'status-danger');
+            const convClass = conversion > 5 ? 'status-active' : (conversion > 2 ? 'status-warning' : 'status-danger');
+            
+            html += `
+                <tr>
+                    <td>${getCountryName(code)}</td>
+                    <td><span class="country-flag">${getFlagEmoji(code)}</span></td>
+                    <td>${stat.visits}</td>
+                    <td>${stat.analyses}</td>
+                    <td><span class="status-badge ${ctrClass}">${ctr}%</span></td>
+                    <td>${stat.registrations}</td>
+                    <td>${stat.purchases}</td>
+                    <td><span class="status-badge ${convClass}">${conversion}%</span></td>
+                    <td>$${stat.revenue}</td>
+                    <td>${avgTime} сек</td>
+                    <td>${returning}%</td>
+                    <td>${timeToPay} год</td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+    }
+    
+    // Оновлення графіків
+    function updateCharts(stats) {
+        const countries = ['UA', 'PL', 'DE', 'FR', 'GB'];
+        const countryNames = ['Україна', 'Польща', 'Німеччина', 'Франція', 'Англія'];
+        const visits = countries.map(c => stats[c]?.visits || 0);
+        const analyses = countries.map(c => stats[c]?.analyses || 0);
+        const purchases = countries.map(c => stats[c]?.purchases || 0);
+        const revenue = countries.map(c => stats[c]?.revenue || 0);
+        
+        // CTR графік
+        const ctrCtx = document.getElementById('ctrChart')?.getContext('2d');
+        if (ctrCtx) {
+            const ctrData = countries.map(c => {
+                const stat = stats[c] || { visits: 0, analyses: 0 };
+                return stat.visits > 0 ? ((stat.analyses / stat.visits) * 100).toFixed(2) : 0;
+            });
+            
+            new Chart(ctrCtx, {
+                type: 'bar',
+                data: {
+                    labels: countryNames,
+                    datasets: [{
+                        label: 'CTR (%)',
+                        data: ctrData,
+                        backgroundColor: 'rgba(99,102,241,0.7)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Конверсія графік
+        const convCtx = document.getElementById('conversionByCountryChart')?.getContext('2d');
+        if (convCtx) {
+            const convData = countries.map(c => {
+                const stat = stats[c] || { registrations: 0, purchases: 0 };
+                return stat.registrations > 0 ? ((stat.purchases / stat.registrations) * 100).toFixed(2) : 0;
+            });
+            
+            new Chart(convCtx, {
+                type: 'bar',
+                data: {
+                    labels: countryNames,
+                    datasets: [{
+                        label: 'Конверсія (%)',
+                        data: convData,
+                        backgroundColor: 'rgba(16,185,129,0.7)',
+                        borderColor: '#10b981',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    // ========== ІНІЦІАЛІЗАЦІЯ ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        analyzeCountryData();
+        
+        // Оновлення при зміні періоду
+        document.getElementById('analyticsPeriod')?.addEventListener('change', analyzeCountryData);
+        document.getElementById('refreshAnalytics')?.addEventListener('click', analyzeCountryData);
+        
+        // Збереження цін
+        document.getElementById('savePrices')?.addEventListener('click', function() {
+            const prices = {
+                basic: document.getElementById('priceBasic').value,
+                business: document.getElementById('priceBusiness').value,
+                enterprise: document.getElementById('priceEnterprise').value
+            };
+            localStorage.setItem('aiProofPrices', JSON.stringify(prices));
+            alert('Ціни збережено!');
+        });
+        
+        // Завантаження збережених цін
+        const savedPrices = localStorage.getItem('aiProofPrices');
+        if (savedPrices) {
+            const prices = JSON.parse(savedPrices);
+            document.getElementById('priceBasic').value = prices.basic || 49;
+            document.getElementById('priceBusiness').value = prices.business || 149;
+            document.getElementById('priceEnterprise').value = prices.enterprise || 499;
+        }
+        
+        // Вихід
+        document.getElementById('logoutBtn')?.addEventListener('click', function() {
+            if (confirm('Вийти з адмін-панелі?')) {
+                window.location.href = 'index.html';
+            }
+        });
+    });
+</script>
+</body>
+</html>
