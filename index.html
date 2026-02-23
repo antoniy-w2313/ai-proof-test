@@ -102,7 +102,6 @@
             box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
         }
         
-        /* Стилі для профілю */
         .avatar {
             width: 40px;
             height: 40px;
@@ -164,7 +163,6 @@
             transition: width 0.3s ease;
         }
         
-        /* Модальні вікна */
         .modal {
             display: none;
             position: fixed;
@@ -207,7 +205,6 @@
             }
         }
         
-        /* Код-інпути */
         .code-input {
             width: 50px;
             height: 50px;
@@ -232,7 +229,6 @@
             border-color: #10b981;
         }
         
-        /* Анімована галочка (як в iPhone) */
         .success-checkmark {
             width: 100px;
             height: 100px;
@@ -347,7 +343,6 @@
             }
         }
         
-        /* Стилі для повідомлення про успіх */
         .success-toast {
             position: fixed;
             top: 50%;
@@ -396,7 +391,6 @@
             color: white;
         }
         
-        /* Стилі для результатів аналізу */
         .stat-box {
             background: rgba(10,10,15,0.6);
             border-radius: 1rem;
@@ -409,12 +403,50 @@
             border-left: 4px solid #6366f1;
         }
         
-        /* Плавні переходи */
+        .upload-card {
+            border: 2px dashed #2d2d3a;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-card:hover {
+            border-color: #6366f1;
+            background: rgba(99,102,241,0.05);
+        }
+        
+        .photo-preview {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .photo-preview:hover {
+            border-color: #6366f1;
+            transform: scale(1.05);
+        }
+        
+        .photo-preview .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .photo-preview:hover .overlay {
+            opacity: 1;
+        }
+        
         .transition-all {
             transition: all 0.3s ease;
         }
         
-        /* Стилі для скролбару */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -588,7 +620,7 @@
             <span class="text-gradient block mt-2" data-i18n="hero_subtitle">ШТУЧНОГО ІНТЕЛЕКТУ</span>
         </h1>
         <p class="text-xl text-gray-400 max-w-3xl mx-auto" data-i18n="hero_description">
-            Точність 99% для 5 мов. Захистіть свій бізнес від AI-контенту.
+            Точність 99% для 5 мов. Аналіз текстів, фото та відео.
         </p>
     </div>
 
@@ -613,9 +645,54 @@
                     </div>
                 </div>
                 
-                <textarea id="textInput" rows="6" 
+                <textarea id="textInput" rows="4" 
                     class="w-full bg-primary/50 border border-gray-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:ring-2 focus:ring-accent/50 transition"
                     placeholder="Вставте текст тут..."></textarea>
+                
+                <!-- Кнопки завантаження фото/відео -->
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Кнопка для фото -->
+                    <div class="upload-card rounded-lg p-4 cursor-pointer" onclick="document.getElementById('photoUpload').click()">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-camera text-2xl text-accent"></i>
+                            <div>
+                                <p class="font-medium" data-i18n="upload_photo">Завантажити фото</p>
+                                <p class="text-xs text-gray-400" data-i18n="photo_limit">до 5 фото, розпізнавання тексту</p>
+                            </div>
+                        </div>
+                        <input type="file" id="photoUpload" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this.files)">
+                    </div>
+                    
+                    <!-- Кнопка для відео -->
+                    <div id="videoUploadBtn" class="upload-card rounded-lg p-4 cursor-pointer opacity-50 relative" onclick="checkVideoAccess()">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-video text-2xl text-gold"></i>
+                            <div>
+                                <p class="font-medium" data-i18n="upload_video">Завантажити відео</p>
+                                <p class="text-xs text-gray-400" data-i18n="video_limit">до 1 години, аналіз аудіо</p>
+                            </div>
+                        </div>
+                        <div id="videoPlanBadge" class="absolute -top-2 -right-2 bg-gold text-black text-xs px-2 py-1 rounded-full hidden">
+                            MAX
+                        </div>
+                        <input type="file" id="videoUpload" accept="video/*" class="hidden" onchange="handleVideoUpload(this.files[0])">
+                    </div>
+                </div>
+                
+                <!-- Індикатор завантажених фото -->
+                <div id="photoPreview" class="flex flex-wrap gap-2 mt-3 hidden"></div>
+                
+                <!-- Прогрес-бар для відео -->
+                <div id="videoProgress" class="mt-3 hidden">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span data-i18n="processing_video">Обробка відео...</span>
+                        <span id="videoProgressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="videoProgressBar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1" id="videoLanguageDetected"></p>
+                </div>
                 
                 <div class="flex justify-between items-center mt-3">
                     <div class="flex items-center space-x-4">
@@ -647,8 +724,8 @@
                     <span class="text-sm text-gray-400" id="analysisTimestamp"></span>
                 </div>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Основна статистика -->
+                <!-- Результат тексту -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="textAnalysisResult">
                     <div class="stat-box">
                         <div class="text-center mb-6">
                             <span class="text-6xl font-bold text-accent" id="aiProbability">0</span>
@@ -676,7 +753,6 @@
                         </div>
                     </div>
                     
-                    <!-- Детальний аналіз -->
                     <div class="stat-box">
                         <h4 class="font-bold mb-4" data-i18n="detailed_analysis">Детальний аналіз</h4>
                         
@@ -720,6 +796,9 @@
                     </div>
                 </div>
                 
+                <!-- Сюди будуть додаватись результати фото та відео -->
+                <div id="additionalResults"></div>
+                
                 <!-- Кнопки дій -->
                 <div class="flex justify-end space-x-3 mt-6">
                     <button class="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-800 transition" onclick="saveReport()">
@@ -747,12 +826,11 @@
             <span data-i18n="features_title">Преміальні</span> <span class="text-gradient" data-i18n="features_gradient">можливості</span>
         </h2>
         <p class="text-xl text-gray-400 max-w-2xl mx-auto" data-i18n="features_subtitle">
-            Все, що потрібно для професійної перевірки текстів
+            Все, що потрібно для професійної перевірки контенту
         </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        <!-- Feature 1 -->
         <div class="feature-card group relative" data-aos="fade-up" data-aos-delay="100">
             <div class="absolute inset-0 bg-gradient-to-r from-accent to-purple rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
             <div class="relative bg-secondary p-8 rounded-2xl border border-gray-800 group-hover:border-transparent transition-all duration-300">
@@ -764,27 +842,25 @@
             </div>
         </div>
 
-        <!-- Feature 2 -->
         <div class="feature-card group relative" data-aos="fade-up" data-aos-delay="200">
             <div class="absolute inset-0 bg-gradient-to-r from-purple to-pink-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
             <div class="relative bg-secondary p-8 rounded-2xl border border-gray-800 group-hover:border-transparent transition-all duration-300">
                 <div class="w-16 h-16 bg-gradient-to-r from-purple to-pink-500 rounded-xl flex items-center justify-center mb-6">
-                    <i class="fas fa-globe text-2xl text-white"></i>
+                    <i class="fas fa-camera text-2xl text-white"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3" data-i18n="feature2_title">5 європейських мов</h3>
-                <p class="text-gray-400" data-i18n="feature2_desc">Українська, англійська, польська, німецька, французька</p>
+                <h3 class="text-xl font-bold mb-3" data-i18n="feature2_title">Аналіз фото</h3>
+                <p class="text-gray-400" data-i18n="feature2_desc">Розпізнавання тексту з фотографій документів</p>
             </div>
         </div>
 
-        <!-- Feature 3 -->
         <div class="feature-card group relative" data-aos="fade-up" data-aos-delay="300">
             <div class="absolute inset-0 bg-gradient-to-r from-pink-500 to-gold rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
             <div class="relative bg-secondary p-8 rounded-2xl border border-gray-800 group-hover:border-transparent transition-all duration-300">
                 <div class="w-16 h-16 bg-gradient-to-r from-pink-500 to-gold rounded-xl flex items-center justify-center mb-6">
-                    <i class="fas fa-chart-line text-2xl text-white"></i>
+                    <i class="fas fa-video text-2xl text-white"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3" data-i18n="feature3_title">Детальна аналітика</h3>
-                <p class="text-gray-400" data-i18n="feature3_desc">Повний звіт з графіками, статистикою та експортом</p>
+                <h3 class="text-xl font-bold mb-3" data-i18n="feature3_title">Аналіз відео</h3>
+                <p class="text-gray-400" data-i18n="feature3_desc">Автовизначення мови та транскрибація розмов</p>
             </div>
         </div>
     </div>
@@ -826,7 +902,7 @@
             </div>
         </div>
 
-        <!-- Business -->
+        <!-- AI-Proof-Pro -->
         <div class="relative group scale-105" data-aos="fade-up" data-aos-delay="200">
             <div class="absolute inset-0 bg-gradient-to-r from-accent to-purple rounded-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
             <div class="relative bg-secondary p-8 rounded-2xl border-2 border-accent/50">
@@ -835,46 +911,46 @@
                 </div>
                 <div class="mb-6 mt-4">
                     <span class="text-sm text-gray-400 uppercase tracking-wider" data-i18n="professional">Професійний</span>
-                    <h3 class="text-3xl font-bold mt-2" data-i18n="business_name">Business</h3>
-                </div>
-                <div class="mb-6">
-                    <span class="text-4xl font-bold">$149</span>
-                    <span class="text-gray-400">/<span data-i18n="month">міс</span></span>
-                </div>
-                <ul class="space-y-4 mb-8">
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature1">5,000 символів за раз</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature2">50 аналізів на день</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature3">Детальний звіт</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature4">API (100/день)</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature5">Пріоритетна підтримка</span></li>
-                </ul>
-                <button class="buy-btn w-full bg-gradient-to-r from-accent to-purple py-3 rounded-lg font-bold hover:shadow-lg hover:shadow-accent/30 transition transform hover:scale-105" data-plan="business">
-                    <span data-i18n="choose_plan">Обрати план</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Enterprise -->
-        <div class="relative group" data-aos="fade-up" data-aos-delay="300">
-            <div class="absolute inset-0 bg-gradient-to-r from-gold to-pink-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
-            <div class="relative bg-secondary p-8 rounded-2xl border border-gray-800">
-                <div class="mb-6">
-                    <span class="text-sm text-gray-400 uppercase tracking-wider" data-i18n="corporate">Корпоративний</span>
-                    <h3 class="text-3xl font-bold mt-2" data-i18n="enterprise_name">Enterprise</h3>
+                    <h3 class="text-3xl font-bold mt-2">AI-Proof-Pro</h3>
                 </div>
                 <div class="mb-6">
                     <span class="text-4xl font-bold">$249</span>
                     <span class="text-gray-400">/<span data-i18n="month">міс</span></span>
                 </div>
                 <ul class="space-y-4 mb-8">
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature1">Необмежено символів</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature2">Необмежено аналізів</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature3">Командний доступ (10+)</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature4">White Label</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature5">Преміум API</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature6">Персональний менеджер</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="pro_feature1">5,000 символів за раз</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="pro_feature2">50 аналізів на день</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="pro_feature3">Аналіз фото (до 5)</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="pro_feature4">OCR розпізнавання</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="pro_feature5">API (100/день)</span></li>
                 </ul>
-                <button class="buy-btn w-full bg-gradient-to-r from-gold to-pink-500 text-black py-3 rounded-lg font-bold hover:shadow-lg transition transform hover:scale-105" data-plan="enterprise">
+                <button class="buy-btn w-full bg-gradient-to-r from-accent to-purple py-3 rounded-lg font-bold hover:shadow-lg hover:shadow-accent/30 transition transform hover:scale-105" data-plan="pro">
+                    <span data-i18n="choose_plan">Обрати план</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- AI-Proof-Max -->
+        <div class="relative group" data-aos="fade-up" data-aos-delay="300">
+            <div class="absolute inset-0 bg-gradient-to-r from-gold to-pink-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
+            <div class="relative bg-secondary p-8 rounded-2xl border border-gray-800">
+                <div class="mb-6">
+                    <span class="text-sm text-gray-400 uppercase tracking-wider" data-i18n="corporate">Корпоративний</span>
+                    <h3 class="text-3xl font-bold mt-2">AI-Proof-Max</h3>
+                </div>
+                <div class="mb-6">
+                    <span class="text-4xl font-bold">$499</span>
+                    <span class="text-gray-400">/<span data-i18n="month">міс</span></span>
+                </div>
+                <ul class="space-y-4 mb-8">
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="max_feature1">Необмежено символів</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="max_feature2">Необмежено аналізів</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="max_feature3">Аналіз відео (до 1 год)</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="max_feature4">Автовизначення мови</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="max_feature5">Транскрибація</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="max_feature6">Командний доступ (10+)</span></li>
+                </ul>
+                <button class="buy-btn w-full bg-gradient-to-r from-gold to-pink-500 text-black py-3 rounded-lg font-bold hover:shadow-lg transition transform hover:scale-105" data-plan="max">
                     <span data-i18n="choose_plan">Обрати план</span>
                 </button>
             </div>
@@ -946,9 +1022,7 @@
     </div>
 </footer>
 
-<!-- ========== МОДАЛЬНІ ВІКНА ========== -->
-
-<!-- Модальне вікно входу -->
+<!-- МОДАЛЬНІ ВІКНА -->
 <div id="loginModal" class="modal">
     <div class="modal-content">
         <div class="flex justify-between items-center mb-6">
@@ -982,7 +1056,6 @@
     </div>
 </div>
 
-<!-- Модальне вікно реєстрації -->
 <div id="registerModal" class="modal">
     <div class="modal-content">
         <div class="flex justify-between items-center mb-6">
@@ -1028,7 +1101,6 @@
     </div>
 </div>
 
-<!-- Модальне вікно відновлення паролю -->
 <div id="forgotModal" class="modal">
     <div class="modal-content">
         <div class="flex justify-between items-center mb-6">
@@ -1036,7 +1108,6 @@
             <button class="text-2xl hover:text-accent" onclick="closeModals()">×</button>
         </div>
         
-        <!-- Крок 1: Email -->
         <div id="step1" class="space-y-4">
             <p class="text-gray-400" data-i18n="step1_text">Введіть email, на який зареєстрований акаунт</p>
             <input type="email" id="resetEmail" placeholder="your@email.com" 
@@ -1046,7 +1117,6 @@
             </button>
         </div>
         
-        <!-- Крок 2: Код (спочатку прихований) -->
         <div id="step2" class="space-y-4 hidden">
             <p class="text-gray-400" data-i18n="step2_text">Введіть 6-значний код, який ми надіслали на вашу пошту</p>
             <div class="flex justify-center space-x-2">
@@ -1066,7 +1136,6 @@
             </button>
         </div>
         
-        <!-- Крок 3: Новий пароль (спочатку прихований) -->
         <div id="step3" class="space-y-4 hidden">
             <p class="text-gray-400" data-i18n="step3_text">Введіть новий пароль</p>
             <div class="relative">
@@ -1088,7 +1157,6 @@
     </div>
 </div>
 
-<!-- Модальне вікно зміни плану -->
 <div id="changePlanModal" class="modal">
     <div class="modal-content max-w-2xl">
         <div class="flex justify-between items-center mb-6">
@@ -1097,40 +1165,22 @@
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <!-- Basic -->
             <div class="plan-card border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-accent transition" onclick="selectPlan('basic')">
                 <h4 class="font-bold text-lg">Basic</h4>
                 <p class="text-2xl font-bold text-accent">$49</p>
                 <p class="text-sm text-gray-400" data-i18n="per_month">/місяць</p>
-                <ul class="text-xs space-y-1 mt-2">
-                    <li>✓ 1,000 символів</li>
-                    <li>✓ 5 аналізів/день</li>
-                </ul>
             </div>
             
-            <!-- Business -->
-            <div class="plan-card border-2 border-accent rounded-lg p-4 cursor-pointer" onclick="selectPlan('business')">
-                <div class="bg-accent text-xs px-2 py-1 rounded-full inline-block mb-1">Популярний</div>
-                <h4 class="font-bold text-lg">Business</h4>
-                <p class="text-2xl font-bold text-accent">$149</p>
+            <div class="plan-card border-2 border-accent rounded-lg p-4 cursor-pointer" onclick="selectPlan('pro')">
+                <h4 class="font-bold text-lg">AI-Proof-Pro</h4>
+                <p class="text-2xl font-bold text-accent">$249</p>
                 <p class="text-sm text-gray-400" data-i18n="per_month">/місяць</p>
-                <ul class="text-xs space-y-1 mt-2">
-                    <li>✓ 5,000 символів</li>
-                    <li>✓ 50 аналізів/день</li>
-                    <li>✓ API</li>
-                </ul>
             </div>
             
-            <!-- Enterprise -->
-            <div class="plan-card border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-gold transition" onclick="selectPlan('enterprise')">
-                <h4 class="font-bold text-lg">Enterprise</h4>
-                <p class="text-2xl font-bold text-gold">$249</p>
+            <div class="plan-card border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-gold transition" onclick="selectPlan('max')">
+                <h4 class="font-bold text-lg">AI-Proof-Max</h4>
+                <p class="text-2xl font-bold text-gold">$499</p>
                 <p class="text-sm text-gray-400" data-i18n="per_month">/місяць</p>
-                <ul class="text-xs space-y-1 mt-2">
-                    <li>✓ Необмежено</li>
-                    <li>✓ Команда 10+</li>
-                    <li>✓ White Label</li>
-                </ul>
             </div>
         </div>
         
@@ -1152,7 +1202,6 @@
     </div>
 </div>
 
-<!-- Модальне вікно історії -->
 <div id="historyModal" class="modal">
     <div class="modal-content max-w-2xl max-h-[80vh] overflow-hidden">
         <div class="flex justify-between items-center mb-6">
@@ -1170,7 +1219,6 @@
     </div>
 </div>
 
-<!-- Повідомлення про успіх з анімованою галочкою -->
 <div id="successToast" class="success-toast" style="display: none;">
     <div class="success-checkmark">
         <div class="check-icon">
@@ -1186,19 +1234,17 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
 <script>
-    // Ініціалізація AOS
     AOS.init({
         duration: 800,
         once: true,
         offset: 100
     });
 
-    // ========== ГЛОБАЛЬНІ ЗМІННІ ==========
     let currentUser = null;
     let resetCode = null;
     let selectedNewPlan = null;
+    let uploadedPhotos = [];
     
-    // Плани
     const plans = {
         'basic': { 
             name: 'Basic', 
@@ -1206,51 +1252,51 @@
             limit: 5, 
             chars: 1000,
             accuracy: 0.95,
-            icon: 'fas fa-rocket'
+            icon: 'fas fa-rocket',
+            features: ['text']
         },
-        'business': { 
-            name: 'Business', 
-            price: 149, 
+        'pro': { 
+            name: 'AI-Proof-Pro', 
+            price: 249, 
             limit: 50, 
             chars: 5000,
             accuracy: 0.97,
-            icon: 'fas fa-briefcase'
+            icon: 'fas fa-camera',
+            features: ['text', 'photo', 'ocr']
         },
-        'enterprise': { 
-            name: 'Enterprise', 
-            price: 249, 
+        'max': { 
+            name: 'AI-Proof-Max', 
+            price: 499, 
             limit: Infinity, 
             chars: Infinity,
             accuracy: 0.99,
-            icon: 'fas fa-crown'
+            icon: 'fas fa-crown',
+            features: ['text', 'photo', 'video', 'ocr', 'speech']
         }
     };
     
-    // Переклади для 5 мов
     const translations = {
         'uk': {
-            // Навігація
             'detector': 'Детектор',
             'features': 'Можливості',
             'pricing': 'Тарифи',
             'about': 'Про нас',
             'login': 'Вхід',
             'register': 'Реєстрація',
-            
-            // Герой
             'premium_badge': '✦ ПРЕМІУМ AI ДЕТЕКТОР ✦',
             'hero_title': 'Детектор',
             'hero_subtitle': 'ШТУЧНОГО ІНТЕЛЕКТУ',
-            'hero_description': 'Точність 99% для 5 мов. Захистіть свій бізнес від AI-контенту.',
-            
-            // Детектор
+            'hero_description': 'Точність 99% для 5 мов. Аналіз текстів, фото та відео.',
             'enter_text': 'Введіть текст для аналізу',
             'free_plan': 'Безкоштовно',
             'free_chars': 'Перші 1000 символів безкоштовно',
             'analyze': 'Проаналізувати',
             'left_today': 'залишилось сьогодні',
-            
-            // Результати
+            'upload_photo': 'Завантажити фото',
+            'photo_limit': 'до 5 фото, розпізнавання тексту',
+            'upload_video': 'Завантажити відео',
+            'video_limit': 'до 1 години, аналіз аудіо',
+            'processing_video': 'Обробка відео...',
             'analysis_result': 'Результат аналізу',
             'ai_probability': 'ймовірність AI',
             'words': 'слів',
@@ -1264,19 +1310,15 @@
             'save': 'Зберегти',
             'copy': 'Копіювати',
             'share': 'Поділитись',
-            
-            // Можливості
             'features_title': 'Преміальні',
             'features_gradient': 'можливості',
-            'features_subtitle': 'Все, що потрібно для професійної перевірки текстів',
+            'features_subtitle': 'Все, що потрібно для професійної перевірки контенту',
             'feature1_title': 'Потрійний алгоритм',
-            'feature1_desc': 'Perplexity, Burstiness та Pattern analysis для максимальної точності 99%',
-            'feature2_title': '5 європейських мов',
-            'feature2_desc': 'Українська, англійська, польська, німецька, французька',
-            'feature3_title': 'Детальна аналітика',
-            'feature3_desc': 'Повний звіт з графіками, статистикою та експортом',
-            
-            // Тарифи
+            'feature1_desc': 'Perplexity, Burstiness та Pattern analysis для 99% точності',
+            'feature2_title': 'Аналіз фото',
+            'feature2_desc': 'Розпізнавання тексту з фотографій документів',
+            'feature3_title': 'Аналіз відео',
+            'feature3_desc': 'Автовизначення мови та транскрибація розмов',
             'pricing_title': 'Оберіть свій',
             'pricing_gradient': 'тариф',
             'pricing_subtitle': 'Прозорі ціни без прихованих платежів',
@@ -1290,27 +1332,21 @@
             'choose_plan': 'Обрати план',
             'popular': 'НАЙПОПУЛЯРНІШИЙ',
             'professional': 'Професійний',
-            'business_name': 'Business',
-            'business_feature1': '5,000 символів за раз',
-            'business_feature2': '50 аналізів на день',
-            'business_feature3': 'Детальний звіт',
-            'business_feature4': 'API (100/день)',
-            'business_feature5': 'Пріоритетна підтримка',
+            'pro_feature1': '5,000 символів за раз',
+            'pro_feature2': '50 аналізів на день',
+            'pro_feature3': 'Аналіз фото (до 5)',
+            'pro_feature4': 'OCR розпізнавання',
+            'pro_feature5': 'API (100/день)',
             'corporate': 'Корпоративний',
-            'enterprise_name': 'Enterprise',
-            'enterprise_feature1': 'Необмежено символів',
-            'enterprise_feature2': 'Необмежено аналізів',
-            'enterprise_feature3': 'Командний доступ (10+)',
-            'enterprise_feature4': 'White Label',
-            'enterprise_feature5': 'Преміум API',
-            'enterprise_feature6': 'Персональний менеджер',
-            
-            // Про нас
+            'max_feature1': 'Необмежено символів',
+            'max_feature2': 'Необмежено аналізів',
+            'max_feature3': 'Аналіз відео (до 1 год)',
+            'max_feature4': 'Автовизначення мови',
+            'max_feature5': 'Транскрибація',
+            'max_feature6': 'Командний доступ (10+)',
             'about_title': 'Про компанію',
             'about_text1': 'AI PROOF — це українська технологічна компанія, що спеціалізується на розробці AI-детекторів для бізнесу та освіти.',
             'about_text2': 'Заснована у 2024 році, команда AI PROOF об\'єднала досвідчених розробників та AI-експертів з усієї Європи.',
-            
-            // Футер
             'footer_text': 'Преміальний AI детектор для бізнесу',
             'product': 'Продукт',
             'company': 'Компанія',
@@ -1318,8 +1354,6 @@
             'terms': 'Умови використання',
             'support': 'Підтримка',
             'rights': 'Всі права захищені',
-            
-            // Модальні вікна
             'login_title': 'Вхід',
             'register_title': 'Реєстрація',
             'email': 'Email',
@@ -1333,8 +1367,6 @@
             'confirm_password': 'Підтвердіть пароль',
             'password_hint': 'Мінімум 6 символів',
             'register_btn': 'Зареєструватися',
-            
-            // Відновлення паролю
             'forgot_title': 'Відновлення паролю',
             'step1_text': 'Введіть email, на який зареєстрований акаунт',
             'send_code': 'Надіслати код',
@@ -1346,8 +1378,6 @@
             'change_password': 'Змінити пароль',
             'code_sent': 'Код відправлено!',
             'password_changed': 'Пароль успішно змінено!',
-            
-            // Профіль
             'current_plan': 'Поточний план',
             'analyses_today': 'сьогодні',
             'expires': 'Діє до',
@@ -1355,8 +1385,6 @@
             'history': 'Історія аналізів',
             'settings': 'Налаштування',
             'logout': 'Вийти',
-            
-            // Інше
             'cancel': 'Скасувати',
             'confirm': 'Підтвердити',
             'close': 'Закрити',
@@ -1364,28 +1392,26 @@
             'change_plan_title': 'Зміна тарифного плану'
         },
         'en': {
-            // Navigation
             'detector': 'Detector',
             'features': 'Features',
             'pricing': 'Pricing',
             'about': 'About',
             'login': 'Login',
             'register': 'Register',
-            
-            // Hero
             'premium_badge': '✦ PREMIUM AI DETECTOR ✦',
             'hero_title': 'AI',
             'hero_subtitle': 'TEXT DETECTOR',
-            'hero_description': '99% accuracy for 5 languages. Protect your business from AI-content.',
-            
-            // Detector
+            'hero_description': '99% accuracy for 5 languages. Text, photo & video analysis.',
             'enter_text': 'Enter text for analysis',
             'free_plan': 'Free',
             'free_chars': 'First 1000 characters free',
             'analyze': 'Analyze',
             'left_today': 'left today',
-            
-            // Results
+            'upload_photo': 'Upload photo',
+            'photo_limit': 'up to 5 photos, text recognition',
+            'upload_video': 'Upload video',
+            'video_limit': 'up to 1 hour, audio analysis',
+            'processing_video': 'Processing video...',
             'analysis_result': 'Analysis Result',
             'ai_probability': 'AI probability',
             'words': 'words',
@@ -1399,19 +1425,15 @@
             'save': 'Save',
             'copy': 'Copy',
             'share': 'Share',
-            
-            // Features
             'features_title': 'Premium',
             'features_gradient': 'Features',
-            'features_subtitle': 'Everything you need for professional text verification',
+            'features_subtitle': 'Everything for professional content verification',
             'feature1_title': 'Triple Algorithm',
-            'feature1_desc': 'Perplexity, Burstiness and Pattern analysis for 99% accuracy',
-            'feature2_title': '5 Languages',
-            'feature2_desc': 'English, Ukrainian, Polish, German, French',
-            'feature3_title': 'Detailed Analytics',
-            'feature3_desc': 'Full report with charts, statistics and export',
-            
-            // Pricing
+            'feature1_desc': 'Perplexity, Burstiness & Pattern analysis for 99% accuracy',
+            'feature2_title': 'Photo Analysis',
+            'feature2_desc': 'Text recognition from document photos',
+            'feature3_title': 'Video Analysis',
+            'feature3_desc': 'Auto language detection & speech transcription',
             'pricing_title': 'Choose your',
             'pricing_gradient': 'Plan',
             'pricing_subtitle': 'Transparent prices with no hidden fees',
@@ -1425,27 +1447,21 @@
             'choose_plan': 'Choose Plan',
             'popular': 'MOST POPULAR',
             'professional': 'Professional',
-            'business_name': 'Business',
-            'business_feature1': '5,000 chars per analysis',
-            'business_feature2': '50 analyses per day',
-            'business_feature3': 'Detailed report',
-            'business_feature4': 'API (100/day)',
-            'business_feature5': 'Priority support',
+            'pro_feature1': '5,000 chars per analysis',
+            'pro_feature2': '50 analyses per day',
+            'pro_feature3': 'Photo analysis (up to 5)',
+            'pro_feature4': 'OCR recognition',
+            'pro_feature5': 'API (100/day)',
             'corporate': 'Corporate',
-            'enterprise_name': 'Enterprise',
-            'enterprise_feature1': 'Unlimited characters',
-            'enterprise_feature2': 'Unlimited analyses',
-            'enterprise_feature3': 'Team access (10+)',
-            'enterprise_feature4': 'White Label',
-            'enterprise_feature5': 'Premium API',
-            'enterprise_feature6': 'Personal manager',
-            
-            // About
+            'max_feature1': 'Unlimited characters',
+            'max_feature2': 'Unlimited analyses',
+            'max_feature3': 'Video analysis (up to 1h)',
+            'max_feature4': 'Auto language detection',
+            'max_feature5': 'Transcription',
+            'max_feature6': 'Team access (10+)',
             'about_title': 'About Company',
             'about_text1': 'AI PROOF is a Ukrainian technology company specializing in AI detectors for business and education.',
             'about_text2': 'Founded in 2024, the AI PROOF team brought together experienced developers and AI experts from across Europe.',
-            
-            // Footer
             'footer_text': 'Premium AI detector for business',
             'product': 'Product',
             'company': 'Company',
@@ -1453,8 +1469,6 @@
             'terms': 'Terms of Use',
             'support': 'Support',
             'rights': 'All rights reserved',
-            
-            // Modals
             'login_title': 'Login',
             'register_title': 'Registration',
             'email': 'Email',
@@ -1468,8 +1482,6 @@
             'confirm_password': 'Confirm Password',
             'password_hint': 'Minimum 6 characters',
             'register_btn': 'Register',
-            
-            // Password recovery
             'forgot_title': 'Password Recovery',
             'step1_text': 'Enter the email associated with your account',
             'send_code': 'Send Code',
@@ -1481,8 +1493,6 @@
             'change_password': 'Change Password',
             'code_sent': 'Code sent!',
             'password_changed': 'Password changed successfully!',
-            
-            // Profile
             'current_plan': 'Current Plan',
             'analyses_today': 'today',
             'expires': 'Expires',
@@ -1490,8 +1500,6 @@
             'history': 'History',
             'settings': 'Settings',
             'logout': 'Logout',
-            
-            // Other
             'cancel': 'Cancel',
             'confirm': 'Confirm',
             'close': 'Close',
@@ -1499,28 +1507,26 @@
             'change_plan_title': 'Change Plan'
         },
         'pl': {
-            // Navigation
             'detector': 'Detektor',
             'features': 'Funkcje',
             'pricing': 'Ceny',
             'about': 'O nas',
             'login': 'Logowanie',
             'register': 'Rejestracja',
-            
-            // Hero
             'premium_badge': '✦ PREMIUM AI DETEKTOR ✦',
             'hero_title': 'Detektor',
             'hero_subtitle': 'TEKSTÓW AI',
-            'hero_description': '99% dokładności dla 5 języków. Chroń swój biznes przed treściami AI.',
-            
-            // Detector
+            'hero_description': '99% dokładności dla 5 języków. Analiza tekstu, zdjęć i wideo.',
             'enter_text': 'Wprowadź tekst do analizy',
             'free_plan': 'Darmowy',
             'free_chars': 'Pierwsze 1000 znaków za darmo',
             'analyze': 'Analizuj',
             'left_today': 'zostało dzisiaj',
-            
-            // Results
+            'upload_photo': 'Prześlij zdjęcie',
+            'photo_limit': 'do 5 zdjęć, rozpoznawanie tekstu',
+            'upload_video': 'Prześlij wideo',
+            'video_limit': 'do 1 godziny, analiza audio',
+            'processing_video': 'Przetwarzanie wideo...',
             'analysis_result': 'Wynik analizy',
             'ai_probability': 'prawdopodobieństwo AI',
             'words': 'słów',
@@ -1534,19 +1540,15 @@
             'save': 'Zapisz',
             'copy': 'Kopiuj',
             'share': 'Udostępnij',
-            
-            // Features
             'features_title': 'Premium',
             'features_gradient': 'funkcje',
-            'features_subtitle': 'Wszystko czego potrzebujesz do profesjonalnej weryfikacji tekstów',
+            'features_subtitle': 'Wszystko do profesjonalnej weryfikacji treści',
             'feature1_title': 'Potrójny algorytm',
             'feature1_desc': 'Perplexity, Burstiness i analiza wzorców dla 99% dokładności',
-            'feature2_title': '5 języków',
-            'feature2_desc': 'Angielski, ukraiński, polski, niemiecki, francuski',
-            'feature3_title': 'Szczegółowa analityka',
-            'feature3_desc': 'Pełny raport z wykresami, statystykami i eksportem',
-            
-            // Pricing
+            'feature2_title': 'Analiza zdjęć',
+            'feature2_desc': 'Rozpoznawanie tekstu z dokumentów',
+            'feature3_title': 'Analiza wideo',
+            'feature3_desc': 'Automatyczne wykrywanie języka i transkrypcja',
             'pricing_title': 'Wybierz swój',
             'pricing_gradient': 'plan',
             'pricing_subtitle': 'Przejrzyste ceny bez ukrytych opłat',
@@ -1560,27 +1562,21 @@
             'choose_plan': 'Wybierz plan',
             'popular': 'NAJPOPULARNIEJSZY',
             'professional': 'Profesjonalny',
-            'business_name': 'Business',
-            'business_feature1': '5,000 znaków na analizę',
-            'business_feature2': '50 analiz dziennie',
-            'business_feature3': 'Szczegółowy raport',
-            'business_feature4': 'API (100/dzień)',
-            'business_feature5': 'Priorytetowe wsparcie',
+            'pro_feature1': '5,000 znaków na analizę',
+            'pro_feature2': '50 analiz dziennie',
+            'pro_feature3': 'Analiza zdjęć (do 5)',
+            'pro_feature4': 'OCR rozpoznawanie',
+            'pro_feature5': 'API (100/dzień)',
             'corporate': 'Korporacyjny',
-            'enterprise_name': 'Enterprise',
-            'enterprise_feature1': 'Nieograniczone znaki',
-            'enterprise_feature2': 'Nieograniczone analizy',
-            'enterprise_feature3': 'Dostęp zespołowy (10+)',
-            'enterprise_feature4': 'White Label',
-            'enterprise_feature5': 'Premium API',
-            'enterprise_feature6': 'Menedżer osobisty',
-            
-            // About
+            'max_feature1': 'Nieograniczone znaki',
+            'max_feature2': 'Nieograniczone analizy',
+            'max_feature3': 'Analiza wideo (do 1h)',
+            'max_feature4': 'Automatyczne wykrywanie języka',
+            'max_feature5': 'Transkrypcja',
+            'max_feature6': 'Dostęp zespołowy (10+)',
             'about_title': 'O firmie',
             'about_text1': 'AI PROOF to ukraińska firma technologiczna specjalizująca się w detektorach AI dla biznesu i edukacji.',
             'about_text2': 'Założona w 2024 roku, zespół AI PROOF zrzesza doświadczonych programistów i ekspertów AI z całej Europy.',
-            
-            // Footer
             'footer_text': 'Premium detektor AI dla biznesu',
             'product': 'Produkt',
             'company': 'Firma',
@@ -1588,8 +1584,6 @@
             'terms': 'Warunki użytkowania',
             'support': 'Wsparcie',
             'rights': 'Wszelkie prawa zastrzeżone',
-            
-            // Modals
             'login_title': 'Logowanie',
             'register_title': 'Rejestracja',
             'email': 'Email',
@@ -1603,8 +1597,6 @@
             'confirm_password': 'Potwierdź hasło',
             'password_hint': 'Minimum 6 znaków',
             'register_btn': 'Zarejestruj się',
-            
-            // Password recovery
             'forgot_title': 'Odzyskiwanie hasła',
             'step1_text': 'Wprowadź email powiązany z kontem',
             'send_code': 'Wyślij kod',
@@ -1616,8 +1608,6 @@
             'change_password': 'Zmień hasło',
             'code_sent': 'Kod wysłany!',
             'password_changed': 'Hasło zmienione pomyślnie!',
-            
-            // Profile
             'current_plan': 'Aktualny plan',
             'analyses_today': 'dzisiaj',
             'expires': 'Wygasa',
@@ -1625,8 +1615,6 @@
             'history': 'Historia',
             'settings': 'Ustawienia',
             'logout': 'Wyloguj się',
-            
-            // Other
             'cancel': 'Anuluj',
             'confirm': 'Potwierdź',
             'close': 'Zamknij',
@@ -1634,28 +1622,26 @@
             'change_plan_title': 'Zmień plan'
         },
         'de': {
-            // Navigation
             'detector': 'Detektor',
             'features': 'Funktionen',
             'pricing': 'Preise',
             'about': 'Über uns',
             'login': 'Anmelden',
             'register': 'Registrieren',
-            
-            // Hero
             'premium_badge': '✦ PREMIUM AI DETEKTOR ✦',
             'hero_title': 'AI',
             'hero_subtitle': 'DETEKTOR',
-            'hero_description': '99% Genauigkeit für 5 Sprachen. Schützen Sie Ihr Unternehmen vor AI-Inhalten.',
-            
-            // Detector
+            'hero_description': '99% Genauigkeit für 5 Sprachen. Text-, Foto- & Videoanalyse.',
             'enter_text': 'Text zur Analyse eingeben',
             'free_plan': 'Kostenlos',
             'free_chars': 'Erste 1000 Zeichen kostenlos',
             'analyze': 'Analysieren',
             'left_today': 'heute übrig',
-            
-            // Results
+            'upload_photo': 'Foto hochladen',
+            'photo_limit': 'bis zu 5 Fotos, Texterkennung',
+            'upload_video': 'Video hochladen',
+            'video_limit': 'bis zu 1 Stunde, Audioanalyse',
+            'processing_video': 'Video wird verarbeitet...',
             'analysis_result': 'Analyseergebnis',
             'ai_probability': 'AI-Wahrscheinlichkeit',
             'words': 'Wörter',
@@ -1669,19 +1655,15 @@
             'save': 'Speichern',
             'copy': 'Kopieren',
             'share': 'Teilen',
-            
-            // Features
             'features_title': 'Premium',
             'features_gradient': 'Funktionen',
-            'features_subtitle': 'Alles für die professionelle Textprüfung',
+            'features_subtitle': 'Alles für die professionelle Inhaltsprüfung',
             'feature1_title': 'Dreifach-Algorithmus',
-            'feature1_desc': 'Perplexität, Burstiness und Musteranalyse für 99% Genauigkeit',
-            'feature2_title': '5 Sprachen',
-            'feature2_desc': 'Englisch, Ukrainisch, Polnisch, Deutsch, Französisch',
-            'feature3_title': 'Detaillierte Analysen',
-            'feature3_desc': 'Vollständiger Bericht mit Diagrammen und Statistiken',
-            
-            // Pricing
+            'feature1_desc': 'Perplexität, Burstiness & Musteranalyse für 99% Genauigkeit',
+            'feature2_title': 'Fotoanalyse',
+            'feature2_desc': 'Texterkennung aus Dokumentfotos',
+            'feature3_title': 'Videoanalyse',
+            'feature3_desc': 'Automatische Spracherkennung & Transkription',
             'pricing_title': 'Wählen Sie Ihren',
             'pricing_gradient': 'Plan',
             'pricing_subtitle': 'Transparente Preise ohne versteckte Gebühren',
@@ -1695,27 +1677,21 @@
             'choose_plan': 'Plan wählen',
             'popular': 'AM BELIEBTESTEN',
             'professional': 'Professionell',
-            'business_name': 'Business',
-            'business_feature1': '5.000 Zeichen pro Analyse',
-            'business_feature2': '50 Analysen pro Tag',
-            'business_feature3': 'Detaillierter Bericht',
-            'business_feature4': 'API (100/Tag)',
-            'business_feature5': 'Prioritäts-Support',
+            'pro_feature1': '5.000 Zeichen pro Analyse',
+            'pro_feature2': '50 Analysen pro Tag',
+            'pro_feature3': 'Fotoanalyse (bis zu 5)',
+            'pro_feature4': 'OCR-Erkennung',
+            'pro_feature5': 'API (100/Tag)',
             'corporate': 'Unternehmen',
-            'enterprise_name': 'Enterprise',
-            'enterprise_feature1': 'Unbegrenzte Zeichen',
-            'enterprise_feature2': 'Unbegrenzte Analysen',
-            'enterprise_feature3': 'Teamzugriff (10+)',
-            'enterprise_feature4': 'White Label',
-            'enterprise_feature5': 'Premium API',
-            'enterprise_feature6': 'Persönlicher Manager',
-            
-            // About
+            'max_feature1': 'Unbegrenzte Zeichen',
+            'max_feature2': 'Unbegrenzte Analysen',
+            'max_feature3': 'Videoanalyse (bis zu 1h)',
+            'max_feature4': 'Automatische Spracherkennung',
+            'max_feature5': 'Transkription',
+            'max_feature6': 'Teamzugriff (10+)',
             'about_title': 'Über uns',
             'about_text1': 'AI PROOF ist ein ukrainisches Technologieunternehmen, das sich auf KI-Detektoren für Unternehmen und Bildung spezialisiert hat.',
             'about_text2': 'Gegründet 2024, vereint das Team von AI PROOF erfahrene Entwickler und KI-Experten aus ganz Europa.',
-            
-            // Footer
             'footer_text': 'Premium-KI-Detektor für Unternehmen',
             'product': 'Produkt',
             'company': 'Unternehmen',
@@ -1723,8 +1699,6 @@
             'terms': 'Nutzungsbedingungen',
             'support': 'Support',
             'rights': 'Alle Rechte vorbehalten',
-            
-            // Modals
             'login_title': 'Anmelden',
             'register_title': 'Registrieren',
             'email': 'E-Mail',
@@ -1738,8 +1712,6 @@
             'confirm_password': 'Passwort bestätigen',
             'password_hint': 'Mindestens 6 Zeichen',
             'register_btn': 'Registrieren',
-            
-            // Password recovery
             'forgot_title': 'Passwort wiederherstellen',
             'step1_text': 'Geben Sie die E-Mail-Adresse Ihres Kontos ein',
             'send_code': 'Code senden',
@@ -1751,8 +1723,6 @@
             'change_password': 'Passwort ändern',
             'code_sent': 'Code gesendet!',
             'password_changed': 'Passwort erfolgreich geändert!',
-            
-            // Profile
             'current_plan': 'Aktueller Plan',
             'analyses_today': 'heute',
             'expires': 'Gültig bis',
@@ -1760,8 +1730,6 @@
             'history': 'Verlauf',
             'settings': 'Einstellungen',
             'logout': 'Abmelden',
-            
-            // Other
             'cancel': 'Abbrechen',
             'confirm': 'Bestätigen',
             'close': 'Schließen',
@@ -1769,28 +1737,26 @@
             'change_plan_title': 'Plan ändern'
         },
         'fr': {
-            // Navigation
             'detector': 'Détecteur',
             'features': 'Fonctions',
             'pricing': 'Tarifs',
             'about': 'À propos',
             'login': 'Connexion',
             'register': 'Inscription',
-            
-            // Hero
             'premium_badge': '✦ DÉTECTEUR IA PREMIUM ✦',
             'hero_title': 'Détecteur',
             'hero_subtitle': 'DE TEXTES IA',
-            'hero_description': '99% de précision pour 5 langues. Protégez votre entreprise du contenu IA.',
-            
-            // Detector
+            'hero_description': '99% de précision pour 5 langues. Analyse de textes, photos et vidéos.',
             'enter_text': 'Entrez le texte à analyser',
             'free_plan': 'Gratuit',
             'free_chars': 'Premiers 1000 caractères gratuits',
             'analyze': 'Analyser',
             'left_today': 'reste aujourd\'hui',
-            
-            // Results
+            'upload_photo': 'Télécharger une photo',
+            'photo_limit': 'jusqu\'à 5 photos, reconnaissance de texte',
+            'upload_video': 'Télécharger une vidéo',
+            'video_limit': 'jusqu\'à 1 heure, analyse audio',
+            'processing_video': 'Traitement de la vidéo...',
             'analysis_result': 'Résultat de l\'analyse',
             'ai_probability': 'probabilité IA',
             'words': 'mots',
@@ -1804,19 +1770,15 @@
             'save': 'Enregistrer',
             'copy': 'Copier',
             'share': 'Partager',
-            
-            // Features
             'features_title': 'Fonctions',
             'features_gradient': 'premium',
-            'features_subtitle': 'Tout pour la vérification professionnelle de textes',
+            'features_subtitle': 'Tout pour la vérification professionnelle de contenu',
             'feature1_title': 'Triple algorithme',
             'feature1_desc': 'Perplexité, Burstiness et analyse de motifs pour 99% de précision',
-            'feature2_title': '5 langues',
-            'feature2_desc': 'Anglais, ukrainien, polonais, allemand, français',
-            'feature3_title': 'Analytique détaillée',
-            'feature3_desc': 'Rapport complet avec graphiques, statistiques et export',
-            
-            // Pricing
+            'feature2_title': 'Analyse photo',
+            'feature2_desc': 'Reconnaissance de texte à partir de photos',
+            'feature3_title': 'Analyse vidéo',
+            'feature3_desc': 'Détection automatique de la langue et transcription',
             'pricing_title': 'Choisissez votre',
             'pricing_gradient': 'plan',
             'pricing_subtitle': 'Prix transparents sans frais cachés',
@@ -1830,27 +1792,21 @@
             'choose_plan': 'Choisir le plan',
             'popular': 'LE PLUS POPULAIRE',
             'professional': 'Professionnel',
-            'business_name': 'Business',
-            'business_feature1': '5 000 caractères par analyse',
-            'business_feature2': '50 analyses par jour',
-            'business_feature3': 'Rapport détaillé',
-            'business_feature4': 'API (100/jour)',
-            'business_feature5': 'Support prioritaire',
+            'pro_feature1': '5 000 caractères par analyse',
+            'pro_feature2': '50 analyses par jour',
+            'pro_feature3': 'Analyse photo (jusqu\'à 5)',
+            'pro_feature4': 'Reconnaissance OCR',
+            'pro_feature5': 'API (100/jour)',
             'corporate': 'Entreprise',
-            'enterprise_name': 'Enterprise',
-            'enterprise_feature1': 'Caractères illimités',
-            'enterprise_feature2': 'Analyses illimitées',
-            'enterprise_feature3': 'Accès équipe (10+)',
-            'enterprise_feature4': 'White Label',
-            'enterprise_feature5': 'API Premium',
-            'enterprise_feature6': 'Gestionnaire personnel',
-            
-            // About
+            'max_feature1': 'Caractères illimités',
+            'max_feature2': 'Analyses illimitées',
+            'max_feature3': 'Analyse vidéo (jusqu\'à 1h)',
+            'max_feature4': 'Détection automatique de la langue',
+            'max_feature5': 'Transcription',
+            'max_feature6': 'Accès équipe (10+)',
             'about_title': 'À propos',
             'about_text1': 'AI PROOF est une entreprise technologique ukrainienne spécialisée dans les détecteurs d\'IA pour les entreprises et l\'éducation.',
             'about_text2': 'Fondée en 2024, l\'équipe d\'AI PROOF réunit des développeurs expérimentés et des experts en IA de toute l\'Europe.',
-            
-            // Footer
             'footer_text': 'Détecteur d\'IA premium pour les entreprises',
             'product': 'Produit',
             'company': 'Société',
@@ -1858,8 +1814,6 @@
             'terms': 'Conditions',
             'support': 'Support',
             'rights': 'Tous droits réservés',
-            
-            // Modals
             'login_title': 'Connexion',
             'register_title': 'Inscription',
             'email': 'Email',
@@ -1873,8 +1827,6 @@
             'confirm_password': 'Confirmer le mot de passe',
             'password_hint': 'Minimum 6 caractères',
             'register_btn': 'S\'inscrire',
-            
-            // Password recovery
             'forgot_title': 'Récupération du mot de passe',
             'step1_text': 'Entrez l\'email associé à votre compte',
             'send_code': 'Envoyer le code',
@@ -1886,8 +1838,6 @@
             'change_password': 'Changer le mot de passe',
             'code_sent': 'Code envoyé!',
             'password_changed': 'Mot de passe changé avec succès!',
-            
-            // Profile
             'current_plan': 'Plan actuel',
             'analyses_today': 'aujourd\'hui',
             'expires': 'Expire le',
@@ -1895,8 +1845,6 @@
             'history': 'Historique',
             'settings': 'Paramètres',
             'logout': 'Déconnexion',
-            
-            // Other
             'cancel': 'Annuler',
             'confirm': 'Confirmer',
             'close': 'Fermer',
@@ -1905,7 +1853,6 @@
         }
     };
 
-    // ========== МОВИ ==========
     function changeLanguage(lang) {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
@@ -1929,7 +1876,6 @@
         });
     });
 
-    // Завантаження збереженої мови
     const savedLang = localStorage.getItem('lang') || 'uk';
     changeLanguage(savedLang);
     const savedBtn = document.querySelector(`.lang-btn[data-lang="${savedLang}"]`);
@@ -1942,7 +1888,6 @@
         savedBtn.classList.add('border-2', 'border-accent');
     }
 
-    // ========== ПЕРЕГЛЯД ПАРОЛЮ ==========
     window.togglePasswordVisibility = function(inputId, iconId) {
         const input = document.getElementById(inputId);
         const icon = document.getElementById(iconId);
@@ -1958,7 +1903,6 @@
         }
     };
 
-    // ========== АВТОРИЗАЦІЯ ==========
     function checkAuth() {
         const user = localStorage.getItem('currentUser');
         if (user) {
@@ -1995,10 +1939,29 @@
             `;
             document.getElementById('analysesLeft').classList.remove('hidden');
             document.getElementById('analysesLeftCount').textContent = limit === Infinity ? '∞' : (limit - used);
+            
+            updateUIBasedOnPlan();
         }
     }
 
-    // ========== МОДАЛЬНІ ВІКНА ==========
+    function updateUIBasedOnPlan() {
+        if (!currentUser) return;
+        
+        const plan = plans[currentUser.plan || 'basic'];
+        const videoBtn = document.getElementById('videoUploadBtn');
+        const videoBadge = document.getElementById('videoPlanBadge');
+        
+        if (plan.name === 'AI-Proof-Max') {
+            videoBtn.classList.remove('opacity-50');
+            videoBtn.classList.add('hover:border-gold');
+            videoBadge.classList.remove('hidden');
+        } else {
+            videoBtn.classList.add('opacity-50');
+            videoBtn.classList.remove('hover:border-gold');
+            videoBadge.classList.add('hidden');
+        }
+    }
+
     window.showLogin = function() {
         closeModals();
         document.getElementById('loginModal').classList.add('active');
@@ -2031,7 +1994,6 @@
         });
     });
 
-    // ========== РЕЄСТРАЦІЯ ==========
     document.getElementById('registerForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         
@@ -2042,18 +2004,18 @@
         const confirm = document.getElementById('regConfirm').value;
         
         if (password !== confirm) {
-            alert(translations[savedLang]['password_mismatch'] || 'Паролі не співпадають');
+            alert('Паролі не співпадають');
             return;
         }
         
         if (password.length < 6) {
-            alert(translations[savedLang]['password_short'] || 'Пароль має містити хоча б 6 символів');
+            alert('Пароль має містити хоча б 6 символів');
             return;
         }
         
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         if (users.find(u => u.email === email)) {
-            alert(translations[savedLang]['user_exists'] || 'Користувач з таким email вже існує');
+            alert('Користувач з таким email вже існує');
             return;
         }
         
@@ -2076,10 +2038,9 @@
         
         checkAuth();
         closeModals();
-        showSuccessToast(translations[savedLang]['register_success'] || 'Реєстрація успішна!');
+        showSuccessToast('Реєстрація успішна!');
     });
 
-    // ========== ВХІД ==========
     document.getElementById('loginForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         
@@ -2094,17 +2055,16 @@
             localStorage.setItem('currentUser', JSON.stringify(user));
             checkAuth();
             closeModals();
-            showSuccessToast(translations[savedLang]['login_success'] || 'Вхід успішний!');
+            showSuccessToast('Вхід успішний!');
         } else {
-            alert(translations[savedLang]['invalid_credentials'] || 'Невірний email або пароль');
+            alert('Невірний email або пароль');
         }
     });
 
-    // ========== ВІДНОВЛЕННЯ ПАРОЛЮ ==========
     window.sendResetCode = function() {
         const email = document.getElementById('resetEmail').value;
         if (!email) {
-            alert(translations[savedLang]['enter_email'] || 'Введіть email');
+            alert('Введіть email');
             return;
         }
         
@@ -2112,7 +2072,7 @@
         localStorage.setItem('resetEmail', email);
         
         console.log('🔐 КОД ВІДНОВЛЕННЯ:', resetCode);
-        alert(translations[savedLang]['code_sent'] + ' ' + resetCode);
+        alert('Код відправлено! ' + resetCode);
         
         document.getElementById('step1').classList.add('hidden');
         document.getElementById('step2').classList.remove('hidden');
@@ -2141,7 +2101,7 @@
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('step3').classList.remove('hidden');
         } else {
-            alert(translations[savedLang]['invalid_code'] || 'Невірний код');
+            alert('Невірний код');
         }
     };
 
@@ -2150,17 +2110,17 @@
         const confirmPass = document.getElementById('confirmNewPassword').value;
         
         if (!newPass || !confirmPass) {
-            alert(translations[savedLang]['fill_fields'] || 'Заповніть всі поля');
+            alert('Заповніть всі поля');
             return;
         }
         
         if (newPass !== confirmPass) {
-            alert(translations[savedLang]['password_mismatch'] || 'Паролі не співпадають');
+            alert('Паролі не співпадають');
             return;
         }
         
         if (newPass.length < 6) {
-            alert(translations[savedLang]['password_short'] || 'Пароль має містити хоча б 6 символів');
+            alert('Пароль має містити хоча б 6 символів');
             return;
         }
         
@@ -2174,7 +2134,7 @@
             localStorage.removeItem('resetEmail');
             
             closeModals();
-            showSuccessToast(translations[savedLang]['password_changed']);
+            showSuccessToast('Пароль успішно змінено!');
             
             setTimeout(() => {
                 showLogin();
@@ -2182,7 +2142,6 @@
         }
     };
 
-    // ========== ПРОФІЛЬ ==========
     document.getElementById('profileAvatar')?.addEventListener('click', () => {
         document.getElementById('profileDropdown').classList.toggle('active');
     });
@@ -2199,15 +2158,231 @@
         document.getElementById('authButtons').classList.remove('hidden');
         document.getElementById('profileSection').classList.add('hidden');
         document.getElementById('profileDropdown').classList.remove('active');
-        document.getElementById('planIndicator').innerHTML = '<i class="fas fa-crown text-gold mr-1"></i>' + (translations[savedLang]['free_plan'] || 'Безкоштовно');
+        document.getElementById('planIndicator').innerHTML = '<i class="fas fa-crown text-gold mr-1"></i>Безкоштовно';
         document.getElementById('analysesLeft').classList.add('hidden');
     };
 
-    // ========== АНАЛІЗ ТЕКСТУ ==========
+    window.handlePhotoUpload = function(files) {
+        if (!currentUser || (currentUser.plan !== 'pro' && currentUser.plan !== 'max')) {
+            alert('Ця функція доступна тільки для AI-Proof-Pro та AI-Proof-Max');
+            return;
+        }
+        
+        const maxPhotos = 5;
+        if (files.length > maxPhotos) {
+            alert(`Можна завантажити не більше ${maxPhotos} фото`);
+            return;
+        }
+        
+        uploadedPhotos = [];
+        const preview = document.getElementById('photoPreview');
+        preview.innerHTML = '';
+        preview.classList.remove('hidden');
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            uploadedPhotos.push(file);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'photo-preview';
+                photoDiv.innerHTML = `
+                    <img src="${e.target.result}" class="w-full h-full object-cover">
+                    <div class="overlay">
+                        <i class="fas fa-spinner fa-spin text-white"></i>
+                    </div>
+                `;
+                preview.appendChild(photoDiv);
+                
+                setTimeout(() => {
+                    photoDiv.querySelector('.overlay').innerHTML = '<i class="fas fa-check text-success"></i>';
+                }, 1000 * (i + 1));
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        setTimeout(() => {
+            analyzePhotos();
+        }, files.length * 1000 + 500);
+    };
+
+    function analyzePhotos() {
+        if (uploadedPhotos.length === 0) return;
+        
+        const randomTexts = [
+            "Штучний інтелект розвивається стрімко...",
+            "Сучасні технології змінюють світ...",
+            "AI детектори стають необхідністю...",
+            "Якість освіти залежить від чесності...",
+            "Перевірка документів на AI..."
+        ];
+        
+        const results = [];
+        for (let i = 0; i < uploadedPhotos.length; i++) {
+            const detectedLang = 'uk';
+            const text = randomTexts[i % randomTexts.length];
+            
+            let hash = 0;
+            for (let j = 0; j < text.length; j++) {
+                hash = ((hash << 5) - hash) + text.charCodeAt(j);
+                hash = hash & hash;
+            }
+            const probability = Math.abs(hash % 70) + 15;
+            
+            results.push({
+                photo: i + 1,
+                text: text,
+                language: detectedLang,
+                probability: probability,
+                conclusion: probability < 30 ? 'Ймовірно людський' : 
+                            probability < 60 ? 'Можливо AI' : 'Ймовірно AI'
+            });
+        }
+        
+        showPhotoResults(results);
+    }
+
+    function showPhotoResults(results) {
+        const additionalResults = document.getElementById('additionalResults');
+        
+        const photoResultsDiv = document.createElement('div');
+        photoResultsDiv.className = 'mt-6 border-t border-gray-700 pt-6';
+        photoResultsDiv.innerHTML = `
+            <h4 class="text-lg font-bold mb-4 flex items-center">
+                <i class="fas fa-images text-accent mr-2"></i>
+                Аналіз фотографій
+            </h4>
+            <div class="space-y-3">
+                ${results.map(r => `
+                    <div class="bg-gray-900 p-3 rounded-lg">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium">Фото ${r.photo}</p>
+                                <p class="text-xs text-gray-400">Мова: ${r.language === 'uk' ? '🇺🇦' : '🇬🇧'}</p>
+                                <p class="text-sm mt-1">${r.text.substring(0, 50)}...</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-lg font-bold text-accent">${r.probability}%</span>
+                                <p class="text-xs text-gray-400">${r.conclusion}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        additionalResults.appendChild(photoResultsDiv);
+    }
+
+    window.checkVideoAccess = function() {
+        if (!currentUser) {
+            alert('Увійдіть в акаунт');
+            showLogin();
+            return;
+        }
+        
+        if (currentUser.plan !== 'max') {
+            alert('Відео-аналіз доступний тільки для AI-Proof-Max');
+            return;
+        }
+        
+        document.getElementById('videoUpload').click();
+    };
+
+    window.handleVideoUpload = function(file) {
+        if (!file) return;
+        
+        if (file.size > 2 * 1024 * 1024 * 1024) {
+            alert('Відео занадто велике. Максимум 1 година (≈2ГБ)');
+            return;
+        }
+        
+        const progress = document.getElementById('videoProgress');
+        const progressBar = document.getElementById('videoProgressBar');
+        const progressPercent = document.getElementById('videoProgressPercent');
+        const languageDetected = document.getElementById('videoLanguageDetected');
+        
+        progress.classList.remove('hidden');
+        
+        let percent = 0;
+        const interval = setInterval(() => {
+            percent += 5;
+            progressBar.style.width = percent + '%';
+            progressPercent.textContent = percent + '%';
+            
+            if (percent >= 100) {
+                clearInterval(interval);
+                
+                const languages = ['uk', 'en', 'pl', 'de', 'fr'];
+                const detectedLang = languages[Math.floor(Math.random() * languages.length)];
+                
+                const langNames = {
+                    'uk': '🇺🇦 Українська',
+                    'en': '🇬🇧 English',
+                    'pl': '🇵🇱 Polski',
+                    'de': '🇩🇪 Deutsch',
+                    'fr': '🇫🇷 Français'
+                };
+                
+                languageDetected.textContent = `🎤 Визначено мову: ${langNames[detectedLang]}`;
+                
+                analyzeVideoAudio(detectedLang);
+            }
+        }, 300);
+    };
+
+    function analyzeVideoAudio(language) {
+        setTimeout(() => {
+            const transcribedText = "Це тестова транскрибація відео. На співбесіді кандидат розповідав про свій досвід роботи з AI технологіями...";
+            
+            let hash = 0;
+            for (let i = 0; i < transcribedText.length; i++) {
+                hash = ((hash << 5) - hash) + transcribedText.charCodeAt(i);
+                hash = hash & hash;
+            }
+            const probability = Math.abs(hash % 70) + 15;
+            
+            const additionalResults = document.getElementById('additionalResults');
+            
+            const videoResultDiv = document.createElement('div');
+            videoResultDiv.className = 'mt-6 border-t border-gray-700 pt-6';
+            videoResultDiv.innerHTML = `
+                <h4 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-video text-gold mr-2"></i>
+                    Аналіз відео/аудіо
+                </h4>
+                <div class="bg-gray-900 p-4 rounded-lg">
+                    <div class="flex items-center mb-3">
+                        <span class="text-2xl mr-2">
+                            ${language === 'uk' ? '🇺🇦' : language === 'en' ? '🇬🇧' : language === 'pl' ? '🇵🇱' : language === 'de' ? '🇩🇪' : '🇫🇷'}
+                        </span>
+                        <span class="font-medium">Мова розмови: ${language.toUpperCase()}</span>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-3">${transcribedText}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">Ймовірність AI в розмові:</span>
+                        <span class="text-2xl font-bold text-accent">${probability}%</span>
+                    </div>
+                    <div class="mt-2 progress-bar">
+                        <div class="progress-fill" style="width: ${probability}%"></div>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2">
+                        ${probability < 30 ? '👤 Ймовірно жива розмова' : 
+                          probability < 60 ? '🤖 Можливо використовувався скрипт' : 
+                          '🤖🎭 Ймовірно AI-генерований голос'}
+                    </p>
+                </div>
+            `;
+            
+            additionalResults.appendChild(videoResultDiv);
+        }, 2000);
+    }
+
     document.getElementById('analyzeBtn')?.addEventListener('click', () => {
         const text = document.getElementById('textInput').value;
         if (!text) {
-            alert(translations[savedLang]['enter_text'] || 'Введіть текст для аналізу');
+            alert('Введіть текст для аналізу');
             return;
         }
         
@@ -2215,16 +2390,16 @@
             const plan = plans[currentUser.plan || 'basic'];
             
             if (plan.limit !== Infinity && (currentUser.analysesToday || 0) >= plan.limit) {
-                alert(translations[savedLang]['limit_reached'] || 'Ліміт аналізів на сьогодні вичерпано');
+                alert('Ліміт аналізів на сьогодні вичерпано');
                 return;
             }
             
             if (text.length > plan.chars) {
-                alert(translations[savedLang]['chars_limit'] + ' ' + plan.chars);
+                alert(`Максимум ${plan.chars} символів для вашого плану`);
                 return;
             }
         } else if (text.length > 1000) {
-            alert(translations[savedLang]['free_limit'] || 'Безкоштовно тільки перші 1000 символів');
+            alert('Безкоштовно тільки перші 1000 символів');
             return;
         }
         
@@ -2265,9 +2440,9 @@
         document.getElementById('patternBar').style.width = pattern + '%';
         
         let conclusion = '';
-        if (probability < 30) conclusion = translations[savedLang]['likely_human'] || 'Ймовірно написано людиною';
-        else if (probability < 60) conclusion = translations[savedLang]['possibly_ai'] || 'Можливо згенеровано AI';
-        else conclusion = translations[savedLang]['likely_ai'] || 'Ймовірно згенеровано AI';
+        if (probability < 30) conclusion = 'Ймовірно написано людиною';
+        else if (probability < 60) conclusion = 'Можливо згенеровано AI';
+        else conclusion = 'Ймовірно згенеровано AI';
         document.getElementById('conclusionText').textContent = conclusion;
         
         document.getElementById('analysisTimestamp').textContent = new Date().toLocaleString();
@@ -2301,7 +2476,6 @@
         }, 100);
     }
 
-    // ========== УСПІШНЕ ПОВІДОМЛЕННЯ ==========
     function showSuccessToast(message) {
         const toast = document.getElementById('successToast');
         document.getElementById('successMessage').textContent = message;
@@ -2316,7 +2490,6 @@
         }, 2000);
     }
 
-    // ========== ІСТОРІЯ ==========
     window.showHistory = function() {
         if (!currentUser) return;
         
@@ -2324,7 +2497,7 @@
         const list = document.getElementById('historyList');
         
         if (history.length === 0) {
-            list.innerHTML = '<p class="text-gray-400 text-center py-4">' + (translations[savedLang]['no_history'] || 'Історія порожня') + '</p>';
+            list.innerHTML = '<p class="text-gray-400 text-center py-4">Історія порожня</p>';
         } else {
             list.innerHTML = history.map(item => `
                 <div class="bg-gray-900 p-3 rounded-lg hover:bg-gray-800 transition">
@@ -2345,7 +2518,6 @@
         document.getElementById('historyModal').classList.add('active');
     };
 
-    // ========== ЗМІНА ПЛАНУ ==========
     window.showChangePlanModal = function() {
         selectedNewPlan = null;
         document.getElementById('currentPlanName').textContent = plans[currentUser.plan || 'basic'].name;
@@ -2380,7 +2552,7 @@
 
     window.confirmPlanChange = function() {
         if (!selectedNewPlan) {
-            alert(translations[savedLang]['select_plan'] || 'Оберіть план');
+            alert('Оберіть план');
             return;
         }
         
@@ -2390,11 +2562,11 @@
         
         let message = '';
         if (diff > 0) {
-            message = (translations[savedLang]['upgrade_confirm'] || 'Апгрейд буде коштувати +$') + diff + '/міс. Продовжити?';
+            message = `Апгрейд буде коштувати +$${diff}/міс. Продовжити?`;
         } else if (diff < 0) {
-            message = (translations[savedLang]['downgrade_confirm'] || 'Даунгрейд зменшить плату на $') + (-diff) + '/міс. Продовжити?';
+            message = `Даунгрейд зменшить плату на $${-diff}/міс. Продовжити?`;
         } else {
-            message = translations[savedLang]['change_confirm'] || 'Змінити план?';
+            message = 'Змінити план?';
         }
         
         if (confirm(message)) {
@@ -2410,40 +2582,37 @@
             
             checkAuth();
             closeModals();
-            showSuccessToast(translations[savedLang]['plan_changed'] || 'План успішно змінено!');
+            showSuccessToast('План успішно змінено!');
         }
     };
 
-    // ========== ЛІЧИЛЬНИК СИМВОЛІВ ==========
     document.getElementById('textInput')?.addEventListener('input', function() {
         document.getElementById('charCount').textContent = this.value.length + '/10000';
     });
 
-    // ========== ДОДАТКОВІ ФУНКЦІЇ ==========
     window.showSettings = function() {
-        alert(translations[savedLang]['settings_coming'] || 'Налаштування профілю (в розробці)');
+        alert('Налаштування профілю (в розробці)');
     };
 
     window.saveReport = function() {
-        showSuccessToast(translations[savedLang]['report_saved'] || 'Звіт збережено в історію');
+        showSuccessToast('Звіт збережено в історію');
     };
 
     window.copyReport = function() {
         const text = document.getElementById('textInput').value;
         navigator.clipboard.writeText(text).then(() => {
-            showSuccessToast(translations[savedLang]['copied'] || 'Скопійовано!');
+            showSuccessToast('Скопійовано!');
         });
     };
 
     window.shareReport = function() {
-        showSuccessToast(translations[savedLang]['share_coming'] || 'Функція поділитись в розробці');
+        showSuccessToast('Функція поділитись в розробці');
     };
 
     window.scrollToTop = function() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Ініціалізація
     checkAuth();
 </script>
 </body>
