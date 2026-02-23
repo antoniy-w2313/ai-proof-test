@@ -66,6 +66,7 @@
             font-family: 'Inter', sans-serif; 
             background: #0a0a0f;
             color: white;
+            overflow-x: hidden;
         }
         
         .gradient-border {
@@ -243,7 +244,6 @@
             border-radius: 50%;
             box-sizing: content-box;
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            animation: rotateCircle 0.5s ease-out;
         }
         
         .check-icon::before {
@@ -336,10 +336,16 @@
         
         @keyframes rotateCircle {
             0% {
-                transform: scale(0) rotate(360deg);
+                transform: scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1) rotate(180deg);
+                opacity: 0.8;
             }
             100% {
-                transform: scale(1) rotate(0);
+                transform: scale(1) rotate(360deg);
+                opacity: 1;
             }
         }
         
@@ -405,7 +411,10 @@
         
         .upload-card {
             border: 2px dashed #2d2d3a;
+            border-radius: 1rem;
+            padding: 1rem;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         
         .upload-card:hover {
@@ -441,6 +450,14 @@
         
         .photo-preview:hover .overlay {
             opacity: 1;
+        }
+        
+        .plan-card {
+            transition: all 0.3s ease;
+        }
+        
+        .plan-card:hover {
+            transform: translateY(-2px);
         }
         
         .transition-all {
@@ -652,7 +669,7 @@
                 <!-- Кнопки завантаження фото/відео -->
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Кнопка для фото -->
-                    <div class="upload-card rounded-lg p-4 cursor-pointer" onclick="document.getElementById('photoUpload').click()">
+                    <div class="upload-card" onclick="document.getElementById('photoUpload').click()">
                         <div class="flex items-center space-x-3">
                             <i class="fas fa-camera text-2xl text-accent"></i>
                             <div>
@@ -664,7 +681,7 @@
                     </div>
                     
                     <!-- Кнопка для відео -->
-                    <div id="videoUploadBtn" class="upload-card rounded-lg p-4 cursor-pointer opacity-50 relative" onclick="checkVideoAccess()">
+                    <div id="videoUploadBtn" class="upload-card opacity-50 relative" onclick="checkVideoAccess()">
                         <div class="flex items-center space-x-3">
                             <i class="fas fa-video text-2xl text-gold"></i>
                             <div>
@@ -712,7 +729,7 @@
         </div>
     </div>
 
-    <!-- Результат аналізу (спочатку прихований) -->
+    <!-- Результат аналізу -->
     <div id="resultSection" class="max-w-4xl mx-auto mt-12 hidden">
         <div class="gradient-border" data-aos="fade-up">
             <div class="p-8">
@@ -838,7 +855,7 @@
                     <i class="fas fa-brain text-2xl text-white"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3" data-i18n="feature1_title">Потрійний алгоритм</h3>
-                <p class="text-gray-400" data-i18n="feature1_desc">Perplexity, Burstiness та Pattern analysis для максимальної точності 99%</p>
+                <p class="text-gray-400" data-i18n="feature1_desc">Perplexity, Burstiness та Pattern analysis для 99% точності</p>
             </div>
         </div>
 
@@ -1165,19 +1182,19 @@
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="plan-card border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-accent transition" onclick="selectPlan('basic')">
+            <div class="plan-card border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-accent transition" onclick="selectPlan('basic', event)">
                 <h4 class="font-bold text-lg">Basic</h4>
                 <p class="text-2xl font-bold text-accent">$49</p>
                 <p class="text-sm text-gray-400" data-i18n="per_month">/місяць</p>
             </div>
             
-            <div class="plan-card border-2 border-accent rounded-lg p-4 cursor-pointer" onclick="selectPlan('pro')">
+            <div class="plan-card border-2 border-accent rounded-lg p-4 cursor-pointer" onclick="selectPlan('pro', event)">
                 <h4 class="font-bold text-lg">AI-Proof-Pro</h4>
                 <p class="text-2xl font-bold text-accent">$249</p>
                 <p class="text-sm text-gray-400" data-i18n="per_month">/місяць</p>
             </div>
             
-            <div class="plan-card border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-gold transition" onclick="selectPlan('max')">
+            <div class="plan-card border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-gold transition" onclick="selectPlan('max', event)">
                 <h4 class="font-bold text-lg">AI-Proof-Max</h4>
                 <p class="text-2xl font-bold text-gold">$499</p>
                 <p class="text-sm text-gray-400" data-i18n="per_month">/місяць</p>
@@ -1227,7 +1244,7 @@
             <div class="icon-circle"></div>
         </div>
     </div>
-    <div class="success-message" id="successMessage" data-i18n="password_changed">Пароль успішно змінено!</div>
+    <div class="success-message" id="successMessage">Пароль успішно змінено!</div>
 </div>
 
 <!-- AOS -->
@@ -1927,6 +1944,8 @@
             if (plan.limit !== Infinity) {
                 const percent = (used / plan.limit) * 100;
                 document.getElementById('analysesProgress').style.width = percent + '%';
+            } else {
+                document.getElementById('analysesProgress').style.width = '0%';
             }
             
             if (currentUser.expires) {
@@ -2478,7 +2497,14 @@
 
     function showSuccessToast(message) {
         const toast = document.getElementById('successToast');
-        document.getElementById('successMessage').textContent = message;
+        const messageEl = document.getElementById('successMessage');
+        messageEl.textContent = message;
+        
+        const circle = document.querySelector('.icon-circle');
+        circle.style.animation = 'none';
+        circle.offsetHeight;
+        circle.style.animation = 'rotateCircle 0.5s ease-out';
+        
         toast.style.display = 'block';
         
         setTimeout(() => {
@@ -2526,7 +2552,19 @@
         document.getElementById('changePlanModal').classList.add('active');
     };
 
-    window.selectPlan = function(plan) {
+    window.selectPlan = function(plan, event) {
+        if (!event || !event.currentTarget) {
+            const buttons = document.querySelectorAll('.plan-card');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes(plan === 'basic' ? 'Basic' : 
+                                             plan === 'pro' ? 'AI-Proof-Pro' : 'AI-Proof-Max')) {
+                    event = { currentTarget: btn };
+                }
+            });
+        }
+        
+        if (!event || !event.currentTarget) return;
+        
         document.querySelectorAll('.plan-card').forEach(el => {
             el.classList.remove('border-accent', 'border-2');
             el.classList.add('border', 'border-gray-700');
