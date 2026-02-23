@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="uk" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PROOF | Premium AI Detector</title>
+    <title>AI PROOF | Преміум AI Детектор</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,6 +23,7 @@
                     animation: {
                         'gradient': 'gradient 6s linear infinite',
                         'float': 'float 3s ease-in-out infinite',
+                        'blob': 'blob 7s infinite',
                     },
                     keyframes: {
                         gradient: {
@@ -38,6 +39,12 @@
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
                             '50%': { transform: 'translateY(-10px)' }
+                        },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' }
                         }
                     }
                 }
@@ -50,9 +57,6 @@
     
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
-    <!-- Axios для визначення країни -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
     
     <!-- Шрифти -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -98,17 +102,322 @@
             box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
         }
         
-        .legal-disclaimer {
-            font-size: 11px;
-            color: #94a3b8;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            margin-top: 20px;
-            padding-top: 15px;
-            line-height: 1.5;
+        /* Стилі для профілю */
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
         
+        .avatar:hover {
+            transform: scale(1.1);
+        }
+        
+        .profile-dropdown {
+            position: absolute;
+            right: 0;
+            top: 60px;
+            width: 320px;
+            background: #14141f;
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        .profile-dropdown.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #2d2d3a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Модальні вікна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: #14141f;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+            border: 1px solid rgba(99,102,241,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transform: scale(1);
+            animation: scaleIn 0.3s ease;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Код-інпути */
+        .code-input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            background: #0a0a0f;
+            border: 1px solid #2d2d3a;
+            border-radius: 0.5rem;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .code-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+            transform: scale(1.05);
+        }
+        
+        .code-input.filled {
+            border-color: #10b981;
+        }
+        
+        /* Анімована галочка (як в iPhone) */
+        .success-checkmark {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .check-icon {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            border-radius: 50%;
+            box-sizing: content-box;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            animation: rotateCircle 0.5s ease-out;
+        }
+        
+        .check-icon::before {
+            content: "";
+            position: absolute;
+            width: 70px;
+            height: 35px;
+            background: #14141f;
+            border-radius: 50%;
+            top: 32px;
+            left: 15px;
+            transform: rotate(-45deg);
+            z-index: 2;
+        }
+        
+        .check-icon::after {
+            content: "";
+            position: absolute;
+            width: 70px;
+            height: 35px;
+            background: #14141f;
+            border-radius: 50%;
+            top: 32px;
+            right: 15px;
+            transform: rotate(45deg);
+            z-index: 2;
+        }
+        
+        .check-icon .icon-line {
+            position: absolute;
+            background: white;
+            border-radius: 10px;
+            z-index: 10;
+        }
+        
+        .check-icon .line-tip {
+            width: 30px;
+            height: 6px;
+            top: 57px;
+            left: 17px;
+            transform: rotate(45deg);
+            animation: checkTip 0.3s ease 0.2s forwards;
+            transform-origin: left;
+            opacity: 0;
+        }
+        
+        .check-icon .line-long {
+            width: 55px;
+            height: 6px;
+            top: 50px;
+            left: 32px;
+            transform: rotate(-45deg);
+            animation: checkLong 0.3s ease 0.2s forwards;
+            transform-origin: left;
+            opacity: 0;
+        }
+        
+        @keyframes checkTip {
+            0% {
+                width: 0;
+                opacity: 0;
+            }
+            100% {
+                width: 30px;
+                opacity: 1;
+            }
+        }
+        
+        @keyframes checkLong {
+            0% {
+                width: 0;
+                opacity: 0;
+            }
+            100% {
+                width: 55px;
+                opacity: 1;
+            }
+        }
+        
+        .check-icon .icon-circle {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.3);
+            top: 5px;
+            left: 5px;
+            animation: rotateCircle 0.5s ease-out;
+        }
+        
+        @keyframes rotateCircle {
+            0% {
+                transform: scale(0) rotate(360deg);
+            }
+            100% {
+                transform: scale(1) rotate(0);
+            }
+        }
+        
+        /* Стилі для повідомлення про успіх */
+        .success-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #14141f;
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            z-index: 2000;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            animation: toastIn 0.3s ease;
+        }
+        
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -30%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        .fade-out {
+            animation: toastOut 0.3s ease forwards;
+        }
+        
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+            to {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+        }
+        
+        .success-message {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: white;
+        }
+        
+        /* Стилі для результатів аналізу */
+        .stat-box {
+            background: rgba(10,10,15,0.6);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        
+        .conclusion-box {
+            background: rgba(99,102,241,0.1);
+            border-left: 4px solid #6366f1;
+        }
+        
+        /* Плавні переходи */
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        
+        /* Стилі для скролбару */
         ::-webkit-scrollbar {
-            width: 10px;
+            width: 8px;
+            height: 8px;
         }
         
         ::-webkit-scrollbar-track {
@@ -117,7 +426,11 @@
         
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border-radius: 5px;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
         }
     </style>
 </head>
@@ -135,7 +448,7 @@
     <div class="container mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
             <!-- Логотип -->
-            <div class="flex items-center space-x-3 group cursor-pointer">
+            <div class="flex items-center space-x-3 group cursor-pointer" onclick="scrollToTop()">
                 <div class="w-12 h-12 bg-gradient-to-r from-accent via-purple to-pink-500 rounded-xl flex items-center justify-center transform group-hover:rotate-6 transition-all duration-300">
                     <span class="font-bold text-xl text-white">AI</span>
                 </div>
@@ -150,32 +463,32 @@
 
             <!-- Навігація -->
             <nav class="hidden md:flex items-center space-x-8">
-                <a href="#detector" class="nav-link relative group" data-key="detector">
-                    <span class="text-gray-300 group-hover:text-accent transition">Detector</span>
+                <a href="#detector" class="nav-link relative group" data-i18n="detector">
+                    <span class="text-gray-300 group-hover:text-accent transition">Детектор</span>
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent to-purple group-hover:w-full transition-all duration-300"></span>
                 </a>
-                <a href="#features" class="nav-link relative group" data-key="features">
-                    <span class="text-gray-300 group-hover:text-accent transition">Features</span>
+                <a href="#features" class="nav-link relative group" data-i18n="features">
+                    <span class="text-gray-300 group-hover:text-accent transition">Можливості</span>
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent to-purple group-hover:w-full transition-all duration-300"></span>
                 </a>
-                <a href="#pricing" class="nav-link relative group" data-key="pricing">
-                    <span class="text-gray-300 group-hover:text-accent transition">Pricing</span>
+                <a href="#pricing" class="nav-link relative group" data-i18n="pricing">
+                    <span class="text-gray-300 group-hover:text-accent transition">Тарифи</span>
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent to-purple group-hover:w-full transition-all duration-300"></span>
                 </a>
-                <a href="#about" class="nav-link relative group" data-key="about">
-                    <span class="text-gray-300 group-hover:text-accent transition">About</span>
+                <a href="#about" class="nav-link relative group" data-i18n="about">
+                    <span class="text-gray-300 group-hover:text-accent transition">Про нас</span>
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent to-purple group-hover:w-full transition-all duration-300"></span>
                 </a>
             </nav>
 
-            <!-- Мови + Кнопки -->
+            <!-- Мови + Профіль -->
             <div class="flex items-center space-x-4">
-                <!-- 5 МОВ З ПРАПОРЦЯМИ -->
+                <!-- 5 мов -->
                 <div class="flex items-center space-x-2">
-                    <button class="lang-btn w-9 h-9 rounded-full overflow-hidden border border-gray-600 hover:border-accent transition transform hover:scale-110" data-lang="uk">
+                    <button class="lang-btn w-9 h-9 rounded-full overflow-hidden border-2 border-accent transition transform hover:scale-110" data-lang="uk">
                         <img src="https://flagcdn.com/ua.svg" alt="UA" class="w-full h-full object-cover">
                     </button>
-                    <button class="lang-btn w-9 h-9 rounded-full overflow-hidden border-2 border-accent transition transform hover:scale-110" data-lang="en">
+                    <button class="lang-btn w-9 h-9 rounded-full overflow-hidden border border-gray-600 hover:border-accent transition transform hover:scale-110" data-lang="en">
                         <img src="https://flagcdn.com/gb.svg" alt="EN" class="w-full h-full object-cover">
                     </button>
                     <button class="lang-btn w-9 h-9 rounded-full overflow-hidden border border-gray-600 hover:border-accent transition transform hover:scale-110" data-lang="pl">
@@ -189,33 +502,93 @@
                     </button>
                 </div>
                 
-                <!-- Кнопки -->
-                <button id="loginBtn" class="login-btn relative group overflow-hidden px-5 py-2 rounded-lg border border-accent/30 hover:border-accent transition">
-                    <span class="relative z-10 text-accent group-hover:text-white transition" data-key="login">Login</span>
-                    <div class="absolute inset-0 bg-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </button>
+                <!-- Профіль / Кнопки входу -->
+                <div id="authButtons" class="flex items-center space-x-3">
+                    <button id="loginBtn" class="border border-accent text-accent hover:bg-accent hover:text-white px-5 py-2 rounded-lg transition transform hover:scale-105">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        <span data-i18n="login">Вхід</span>
+                    </button>
+                    <button id="registerBtn" class="bg-accent hover:bg-blue-600 text-white px-5 py-2 rounded-lg transition transform hover:scale-105">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        <span data-i18n="register">Реєстрація</span>
+                    </button>
+                </div>
                 
-                <button id="registerBtn" class="register-btn relative group overflow-hidden bg-gradient-to-r from-accent to-purple px-5 py-2 rounded-lg hover:shadow-lg hover:shadow-accent/30 transition transform hover:scale-105">
-                    <span class="relative z-10 text-white font-medium" data-key="register">Register</span>
-                    <div class="absolute inset-0 bg-gradient-to-r from-purple to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </button>
+                <!-- Профіль (після входу) -->
+                <div id="profileSection" class="relative hidden">
+                    <div class="avatar" id="profileAvatar">О</div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-16 h-16 bg-gradient-to-r from-accent to-purple rounded-full flex items-center justify-center text-2xl font-bold">
+                                <span id="profileInitial">О</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-bold text-lg" id="profileName">Олександр</p>
+                                <p class="text-sm text-gray-400" id="profileEmail">user@email.com</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Поточний план -->
+                        <div class="bg-gray-900 p-4 rounded-xl mb-4">
+                            <p class="text-sm text-gray-400 mb-1" data-i18n="current_plan">Поточний план</p>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-xl" id="currentPlan">Basic</span>
+                                <span class="text-2xl font-bold text-accent" id="planPrice">$49</span>
+                            </div>
+                            <div class="progress-bar mb-2">
+                                <div class="progress-fill" id="analysesProgress" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">
+                                    <span id="analysesUsed">0</span>/<span id="analysesLimit">5</span>
+                                </span>
+                                <span class="text-gray-400" data-i18n="analyses_today">сьогодні</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">
+                                <i class="far fa-calendar-alt mr-1"></i>
+                                <span data-i18n="expires">Діє до</span>: <span id="planExpires">23.04.2026</span>
+                            </p>
+                        </div>
+                        
+                        <!-- Швидкі дії -->
+                        <div class="space-y-1">
+                            <button class="w-full text-left px-4 py-3 hover:bg-gray-800 rounded-lg transition flex items-center" onclick="showChangePlanModal()">
+                                <i class="fas fa-exchange-alt w-6 text-accent"></i>
+                                <span data-i18n="change_plan">Змінити план</span>
+                            </button>
+                            <button class="w-full text-left px-4 py-3 hover:bg-gray-800 rounded-lg transition flex items-center" onclick="showHistory()">
+                                <i class="fas fa-history w-6 text-accent"></i>
+                                <span data-i18n="history">Історія аналізів</span>
+                            </button>
+                            <button class="w-full text-left px-4 py-3 hover:bg-gray-800 rounded-lg transition flex items-center" onclick="showSettings()">
+                                <i class="fas fa-cog w-6 text-accent"></i>
+                                <span data-i18n="settings">Налаштування</span>
+                            </button>
+                            <div class="border-t border-gray-700 my-2"></div>
+                            <button class="w-full text-left px-4 py-3 hover:bg-gray-800 rounded-lg transition flex items-center text-red-400" onclick="logout()">
+                                <i class="fas fa-sign-out-alt w-6"></i>
+                                <span data-i18n="logout">Вийти</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- ГЕРОЙ СЕКЦІЯ -->
+<!-- Головна секція -->
 <section id="detector" class="container mx-auto px-4 py-20">
     <div class="text-center mb-16" data-aos="fade-up">
         <div class="inline-block px-6 py-2 rounded-full bg-accent/10 border border-accent/30 mb-6">
-            <span class="text-gradient font-semibold">✦ PREMIUM AI DETECTOR ✦</span>
+            <span class="text-gradient font-semibold" data-i18n="premium_badge">✦ ПРЕМІУМ AI ДЕТЕКТОР ✦</span>
         </div>
-        <h1 class="text-6xl md:text-7xl font-bold mb-6">
-            <span data-key="hero_title">AI Text</span>
-            <span class="text-gradient block mt-2">DETECTOR</span>
+        <h1 class="text-5xl md:text-6xl font-bold mb-6">
+            <span data-i18n="hero_title">Детектор</span>
+            <span class="text-gradient block mt-2" data-i18n="hero_subtitle">ШТУЧНОГО ІНТЕЛЕКТУ</span>
         </h1>
-        <p class="text-xl text-gray-400 max-w-3xl mx-auto" data-key="hero_subtitle">
-            99% accuracy for 5 languages. Protect your business from AI-content with professional tool.
+        <p class="text-xl text-gray-400 max-w-3xl mx-auto" data-i18n="hero_description">
+            Точність 99% для 5 мов. Захистіть свій бізнес від AI-контенту.
         </p>
     </div>
 
@@ -226,27 +599,140 @@
                 <div class="flex items-center justify-between mb-4">
                     <label class="text-lg font-medium">
                         <i class="fas fa-pen-fancy text-accent mr-2"></i>
-                        <span data-key="enter_text">Enter text for analysis</span>
+                        <span data-i18n="enter_text">Введіть текст для аналізу</span>
                     </label>
-                    <span class="text-sm text-gray-400">
-                        <i class="far fa-clock mr-1"></i>
-                        <span data-key="free_chars">First 1000 characters free</span>
-                    </span>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm text-gray-400" id="planIndicator">
+                            <i class="fas fa-crown text-gold mr-1"></i>
+                            <span data-i18n="free_plan">Безкоштовно</span>
+                        </span>
+                        <span class="text-sm text-gray-400">
+                            <i class="far fa-clock mr-1"></i>
+                            <span data-i18n="free_chars">Перші 1000 символів безкоштовно</span>
+                        </span>
+                    </div>
                 </div>
                 
                 <textarea id="textInput" rows="6" 
                     class="w-full bg-primary/50 border border-gray-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:ring-2 focus:ring-accent/50 transition"
-                    placeholder="Paste your text here..."></textarea>
+                    placeholder="Вставте текст тут..."></textarea>
                 
                 <div class="flex justify-between items-center mt-3">
-                    <span id="charCount" class="text-sm font-medium text-accent">0/10000</span>
-                    
-                    <button id="analyzeBtn" class="group relative overflow-hidden bg-gradient-to-r from-accent to-purple px-8 py-3 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-accent/30 transition transform hover:scale-105">
-                        <span class="relative z-10 flex items-center">
-                            <i class="fas fa-magic mr-2"></i>
-                            <span data-key="analyze">Analyze</span>
+                    <div class="flex items-center space-x-4">
+                        <span id="charCount" class="text-sm font-medium text-accent">0/10000</span>
+                        <span id="analysesLeft" class="text-sm text-gray-500 hidden">
+                            <i class="fas fa-chart-line mr-1"></i>
+                            <span id="analysesLeftCount">5</span> <span data-i18n="left_today">залишилось сьогодні</span>
                         </span>
-                        <div class="absolute inset-0 bg-gradient-to-r from-purple to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    
+                    <button id="analyzeBtn" class="bg-gradient-to-r from-accent to-purple px-8 py-3 rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-accent/30 transition transform hover:scale-105">
+                        <i class="fas fa-magic mr-2"></i>
+                        <span data-i18n="analyze">Проаналізувати</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Результат аналізу (спочатку прихований) -->
+    <div id="resultSection" class="max-w-4xl mx-auto mt-12 hidden">
+        <div class="gradient-border" data-aos="fade-up">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold flex items-center">
+                        <i class="fas fa-chart-pie text-accent mr-3"></i>
+                        <span data-i18n="analysis_result">Результат аналізу</span>
+                    </h3>
+                    <span class="text-sm text-gray-400" id="analysisTimestamp"></span>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Основна статистика -->
+                    <div class="stat-box">
+                        <div class="text-center mb-6">
+                            <span class="text-6xl font-bold text-accent" id="aiProbability">0</span>
+                            <span class="text-3xl text-gray-400">%</span>
+                            <p class="text-sm text-gray-400 mt-2" data-i18n="ai_probability">ймовірність AI</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center">
+                                <p class="text-2xl font-bold" id="wordCount">0</p>
+                                <p class="text-xs text-gray-400" data-i18n="words">слів</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold" id="charCount2">0</p>
+                                <p class="text-xs text-gray-400" data-i18n="chars">символів</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold" id="sentenceCount">0</p>
+                                <p class="text-xs text-gray-400" data-i18n="sentences">речень</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold" id="readingTime">0</p>
+                                <p class="text-xs text-gray-400" data-i18n="reading_time">хв читання</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Детальний аналіз -->
+                    <div class="stat-box">
+                        <h4 class="font-bold mb-4" data-i18n="detailed_analysis">Детальний аналіз</h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm" data-i18n="perplexity">Perplexity</span>
+                                    <span class="text-sm font-medium" id="perplexityValue">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="perplexityBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm" data-i18n="burstiness">Burstiness</span>
+                                    <span class="text-sm font-medium" id="burstinessValue">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="burstinessBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm" data-i18n="pattern">Pattern</span>
+                                    <span class="text-sm font-medium" id="patternValue">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="patternBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="conclusion-box p-4 rounded-lg mt-4">
+                            <p class="text-sm font-medium" id="conclusionText">
+                                Ймовірно написано людиною
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Кнопки дій -->
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button class="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-800 transition" onclick="saveReport()">
+                        <i class="fas fa-save mr-2"></i>
+                        <span data-i18n="save">Зберегти</span>
+                    </button>
+                    <button class="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-800 transition" onclick="copyReport()">
+                        <i class="fas fa-copy mr-2"></i>
+                        <span data-i18n="copy">Копіювати</span>
+                    </button>
+                    <button class="px-4 py-2 bg-accent hover:bg-blue-600 rounded-lg transition" onclick="shareReport()">
+                        <i class="fas fa-share mr-2"></i>
+                        <span data-i18n="share">Поділитись</span>
                     </button>
                 </div>
             </div>
@@ -254,14 +740,14 @@
     </div>
 </section>
 
-<!-- МОЖЛИВОСТІ -->
+<!-- Можливості -->
 <section id="features" class="container mx-auto px-4 py-20">
     <div class="text-center mb-16" data-aos="fade-up">
         <h2 class="text-4xl md:text-5xl font-bold mb-4">
-            <span data-key="features_title">Premium</span> <span class="text-gradient">Features</span>
+            <span data-i18n="features_title">Преміальні</span> <span class="text-gradient" data-i18n="features_gradient">можливості</span>
         </h2>
-        <p class="text-xl text-gray-400 max-w-2xl mx-auto" data-key="features_subtitle">
-            Everything you need for professional text verification
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto" data-i18n="features_subtitle">
+            Все, що потрібно для професійної перевірки текстів
         </p>
     </div>
 
@@ -273,8 +759,8 @@
                 <div class="w-16 h-16 bg-gradient-to-r from-accent to-purple rounded-xl flex items-center justify-center mb-6">
                     <i class="fas fa-brain text-2xl text-white"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3" data-key="feature1_title">Triple Algorithm</h3>
-                <p class="text-gray-400" data-key="feature1_desc">Perplexity, Burstiness and Pattern analysis for 99% accuracy</p>
+                <h3 class="text-xl font-bold mb-3" data-i18n="feature1_title">Потрійний алгоритм</h3>
+                <p class="text-gray-400" data-i18n="feature1_desc">Perplexity, Burstiness та Pattern analysis для максимальної точності 99%</p>
             </div>
         </div>
 
@@ -285,8 +771,8 @@
                 <div class="w-16 h-16 bg-gradient-to-r from-purple to-pink-500 rounded-xl flex items-center justify-center mb-6">
                     <i class="fas fa-globe text-2xl text-white"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3" data-key="feature2_title">5 Languages</h3>
-                <p class="text-gray-400" data-key="feature2_desc">English, Ukrainian, Polish, German, French</p>
+                <h3 class="text-xl font-bold mb-3" data-i18n="feature2_title">5 європейських мов</h3>
+                <p class="text-gray-400" data-i18n="feature2_desc">Українська, англійська, польська, німецька, французька</p>
             </div>
         </div>
 
@@ -297,21 +783,21 @@
                 <div class="w-16 h-16 bg-gradient-to-r from-pink-500 to-gold rounded-xl flex items-center justify-center mb-6">
                     <i class="fas fa-chart-line text-2xl text-white"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3" data-key="feature3_title">Detailed Analytics</h3>
-                <p class="text-gray-400" data-key="feature3_desc">Full report with charts, statistics and PDF export</p>
+                <h3 class="text-xl font-bold mb-3" data-i18n="feature3_title">Детальна аналітика</h3>
+                <p class="text-gray-400" data-i18n="feature3_desc">Повний звіт з графіками, статистикою та експортом</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ТАРИФИ -->
+<!-- Тарифи -->
 <section id="pricing" class="container mx-auto px-4 py-20">
     <div class="text-center mb-16" data-aos="fade-up">
         <h2 class="text-4xl md:text-5xl font-bold mb-4">
-            <span data-key="pricing_title">Choose your</span> <span class="text-gradient">Plan</span>
+            <span data-i18n="pricing_title">Оберіть свій</span> <span class="text-gradient" data-i18n="pricing_gradient">тариф</span>
         </h2>
-        <p class="text-xl text-gray-400 max-w-2xl mx-auto" data-key="pricing_subtitle">
-            Transparent pricing with no hidden fees
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto" data-i18n="pricing_subtitle">
+            Прозорі ціни без прихованих платежів
         </p>
     </div>
 
@@ -321,21 +807,21 @@
             <div class="absolute inset-0 bg-gradient-to-r from-gray-600 to-gray-400 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
             <div class="relative bg-secondary p-8 rounded-2xl border border-gray-800">
                 <div class="mb-6">
-                    <span class="text-sm text-gray-400 uppercase tracking-wider" data-key="starter">Starter</span>
-                    <h3 class="text-3xl font-bold mt-2" data-key="basic_name">Basic</h3>
+                    <span class="text-sm text-gray-400 uppercase tracking-wider" data-i18n="starter">Стартовий</span>
+                    <h3 class="text-3xl font-bold mt-2" data-i18n="basic_name">Basic</h3>
                 </div>
                 <div class="mb-6">
                     <span class="text-4xl font-bold">$49</span>
-                    <span class="text-gray-400">/<span data-key="per_month">month</span></span>
+                    <span class="text-gray-400">/<span data-i18n="month">міс</span></span>
                 </div>
                 <ul class="space-y-4 mb-8">
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-key="basic_feature1">1,000 chars per analysis</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-key="basic_feature2">5 analyses per day</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-key="basic_feature3">Basic report</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-key="basic_feature4">Email support</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="basic_feature1">1,000 символів за раз</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="basic_feature2">5 аналізів на день</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="basic_feature3">Базовий звіт</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="basic_feature4">Email підтримка</span></li>
                 </ul>
                 <button class="buy-btn w-full py-3 rounded-lg border border-accent/30 hover:border-accent hover:bg-accent/10 transition" data-plan="basic">
-                    <span data-key="choose_plan">Choose Plan</span>
+                    <span data-i18n="choose_plan">Обрати план</span>
                 </button>
             </div>
         </div>
@@ -345,25 +831,25 @@
             <div class="absolute inset-0 bg-gradient-to-r from-accent to-purple rounded-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
             <div class="relative bg-secondary p-8 rounded-2xl border-2 border-accent/50">
                 <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-accent to-purple px-6 py-1 rounded-full text-sm font-medium">
-                    <span data-key="popular">MOST POPULAR</span>
+                    <span data-i18n="popular">НАЙПОПУЛЯРНІШИЙ</span>
                 </div>
                 <div class="mb-6 mt-4">
-                    <span class="text-sm text-gray-400 uppercase tracking-wider" data-key="professional">Professional</span>
-                    <h3 class="text-3xl font-bold mt-2" data-key="business_name">Business</h3>
+                    <span class="text-sm text-gray-400 uppercase tracking-wider" data-i18n="professional">Професійний</span>
+                    <h3 class="text-3xl font-bold mt-2" data-i18n="business_name">Business</h3>
                 </div>
                 <div class="mb-6">
                     <span class="text-4xl font-bold">$149</span>
-                    <span class="text-gray-400">/<span data-key="per_month">month</span></span>
+                    <span class="text-gray-400">/<span data-i18n="month">міс</span></span>
                 </div>
                 <ul class="space-y-4 mb-8">
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-key="business_feature1">5,000 chars per analysis</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-key="business_feature2">50 analyses per day</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-key="business_feature3">Detailed report + PDF</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-key="business_feature4">API (100 requests/day)</span></li>
-                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-key="business_feature5">Priority support</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature1">5,000 символів за раз</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature2">50 аналізів на день</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature3">Детальний звіт</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature4">API (100/день)</span></li>
+                    <li class="flex items-center"><i class="fas fa-check text-success mr-3"></i><span data-i18n="business_feature5">Пріоритетна підтримка</span></li>
                 </ul>
                 <button class="buy-btn w-full bg-gradient-to-r from-accent to-purple py-3 rounded-lg font-bold hover:shadow-lg hover:shadow-accent/30 transition transform hover:scale-105" data-plan="business">
-                    <span data-key="choose_plan">Choose Plan</span>
+                    <span data-i18n="choose_plan">Обрати план</span>
                 </button>
             </div>
         </div>
@@ -373,47 +859,47 @@
             <div class="absolute inset-0 bg-gradient-to-r from-gold to-pink-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
             <div class="relative bg-secondary p-8 rounded-2xl border border-gray-800">
                 <div class="mb-6">
-                    <span class="text-sm text-gray-400 uppercase tracking-wider" data-key="corporate">Corporate</span>
-                    <h3 class="text-3xl font-bold mt-2" data-key="enterprise_name">Enterprise</h3>
+                    <span class="text-sm text-gray-400 uppercase tracking-wider" data-i18n="corporate">Корпоративний</span>
+                    <h3 class="text-3xl font-bold mt-2" data-i18n="enterprise_name">Enterprise</h3>
                 </div>
                 <div class="mb-6">
-                    <span class="text-4xl font-bold">$499</span>
-                    <span class="text-gray-400">/<span data-key="per_month">month</span></span>
+                    <span class="text-4xl font-bold">$249</span>
+                    <span class="text-gray-400">/<span data-i18n="month">міс</span></span>
                 </div>
                 <ul class="space-y-4 mb-8">
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-key="enterprise_feature1">Unlimited characters</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-key="enterprise_feature2">Unlimited analyses</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-key="enterprise_feature3">Team access (10+)</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-key="enterprise_feature4">White Label</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-key="enterprise_feature5">Premium API</span></li>
-                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-key="enterprise_feature6">Personal manager</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature1">Необмежено символів</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature2">Необмежено аналізів</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature3">Командний доступ (10+)</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature4">White Label</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature5">Преміум API</span></li>
+                    <li class="flex items-center"><i class="fas fa-crown text-gold mr-3"></i><span data-i18n="enterprise_feature6">Персональний менеджер</span></li>
                 </ul>
                 <button class="buy-btn w-full bg-gradient-to-r from-gold to-pink-500 text-black py-3 rounded-lg font-bold hover:shadow-lg transition transform hover:scale-105" data-plan="enterprise">
-                    <span data-key="choose_plan">Choose Plan</span>
+                    <span data-i18n="choose_plan">Обрати план</span>
                 </button>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ПРО НАС -->
+<!-- Про нас -->
 <section id="about" class="container mx-auto px-4 py-20">
     <div class="gradient-border max-w-4xl mx-auto" data-aos="fade-up">
         <div class="p-12">
-            <h2 class="text-4xl font-bold mb-6 text-center" data-key="about_title">About Company</h2>
-            <p class="text-gray-300 text-lg mb-4" data-key="about_text1">
-                AI PROOF is a Ukrainian technology company specializing in AI detectors for business and education. 
-                Our mission is to make the internet cleaner and protect academic integrity.
+            <h2 class="text-4xl font-bold mb-6 text-center" data-i18n="about_title">Про компанію</h2>
+            <p class="text-gray-300 text-lg mb-4" data-i18n="about_text1">
+                AI PROOF — це українська технологічна компанія, що спеціалізується на розробці 
+                AI-детекторів для бізнесу та освіти.
             </p>
-            <p class="text-gray-300 text-lg" data-key="about_text2">
-                Founded in 2024, the AI PROOF team brought together experienced developers and AI experts from across Europe. 
-                We work 24/7 to provide the best service.
+            <p class="text-gray-300 text-lg" data-i18n="about_text2">
+                Заснована у 2024 році, команда AI PROOF об'єднала досвідчених розробників та 
+                AI-експертів з усієї Європи.
             </p>
         </div>
     </div>
 </section>
 
-<!-- ФУТЕР -->
+<!-- Футер -->
 <footer class="border-t border-gray-800 mt-20">
     <div class="container mx-auto px-4 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -424,155 +910,379 @@
                     </div>
                     <h3 class="text-xl font-bold">AI<span class="text-gradient">PROOF</span></h3>
                 </div>
-                <p class="text-gray-400 text-sm" data-key="footer_text">Premium AI detector for business</p>
+                <p class="text-gray-400 text-sm" data-i18n="footer_text">Преміальний AI детектор для бізнесу</p>
             </div>
             
             <div>
-                <h4 class="text-lg font-bold mb-4" data-key="product">Product</h4>
+                <h4 class="text-lg font-bold mb-4" data-i18n="product">Продукт</h4>
                 <ul class="space-y-2">
-                    <li><a href="#detector" class="text-gray-400 hover:text-white" data-key="detector">Detector</a></li>
-                    <li><a href="#features" class="text-gray-400 hover:text-white" data-key="features">Features</a></li>
-                    <li><a href="#pricing" class="text-gray-400 hover:text-white" data-key="pricing">Pricing</a></li>
+                    <li><a href="#detector" class="text-gray-400 hover:text-white" data-i18n="detector">Детектор</a></li>
+                    <li><a href="#features" class="text-gray-400 hover:text-white" data-i18n="features">Можливості</a></li>
+                    <li><a href="#pricing" class="text-gray-400 hover:text-white" data-i18n="pricing">Тарифи</a></li>
                 </ul>
             </div>
             
             <div>
-                <h4 class="text-lg font-bold mb-4" data-key="company">Company</h4>
+                <h4 class="text-lg font-bold mb-4" data-i18n="company">Компанія</h4>
                 <ul class="space-y-2">
-                    <li><a href="#about" class="text-gray-400 hover:text-white" data-key="about">About</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white" id="privacyLink" data-key="privacy">Privacy Policy</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white" id="termsLink" data-key="terms">Terms of Use</a></li>
+                    <li><a href="#about" class="text-gray-400 hover:text-white" data-i18n="about">Про нас</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white" id="privacyLink" data-i18n="privacy">Політика конфіденційності</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white" id="termsLink" data-i18n="terms">Умови використання</a></li>
                 </ul>
             </div>
             
             <div>
-                <h4 class="text-lg font-bold mb-4" data-key="support">Support</h4>
+                <h4 class="text-lg font-bold mb-4" data-i18n="support">Підтримка</h4>
                 <ul class="space-y-2">
                     <li class="text-gray-400"><i class="fas fa-envelope mr-2"></i>support@aiproof.eu</li>
+                    <li class="text-gray-400"><i class="fas fa-clock mr-2"></i>24/7</li>
                 </ul>
             </div>
         </div>
         
-        <!-- Юридичний дисклеймер -->
-        <div class="legal-disclaimer" id="legalDisclaimer">
-            <p style="font-weight: bold; color: #f59e0b; margin-bottom: 8px;">⚠️ IMPORTANT LEGAL INFORMATION:</p>
-            <p>Analysis results are provided "as is" based on AI algorithms with ~95-99% accuracy.</p>
-            <p>AI PROOF does not guarantee 100% accuracy in detecting AI content.</p>
-            <p>This report is a supporting tool, not an expert opinion.</p>
-            <p>The company is not responsible for decisions made based on this report.</p>
-            <p>For legally significant decisions, please consult professional experts.</p>
-            <p style="margin-top: 10px; font-style: italic;">This is an automated message, please do not reply.</p>
-        </div>
-        
-        <div class="border-t border-gray-800 mt-4 pt-4 text-center text-gray-500 text-xs">
-            <p>© 2024 AI PROOF. <span data-key="rights">All rights reserved</span>.</p>
+        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+            <p>© 2024 AI PROOF. <span data-i18n="rights">Всі права захищені</span>.</p>
         </div>
     </div>
 </footer>
 
+<!-- ========== МОДАЛЬНІ ВІКНА ========== -->
+
+<!-- Модальне вікно входу -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold" data-i18n="login_title">Вхід</h3>
+            <button class="text-2xl hover:text-accent" onclick="closeModals()">×</button>
+        </div>
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-2" data-i18n="email">Email</label>
+                <input type="email" id="loginEmail" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2" data-i18n="password">Пароль</label>
+                <div class="relative">
+                    <input type="password" id="loginPassword" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 pr-12" required>
+                    <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-accent" 
+                       id="toggleLoginPassword" onclick="togglePasswordVisibility('loginPassword', 'toggleLoginPassword')"></i>
+                </div>
+            </div>
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-sm text-accent hover:underline" onclick="showForgotPassword()" data-i18n="forgot_password">Забули пароль?</a>
+            </div>
+            <button type="submit" class="w-full bg-accent hover:bg-blue-600 py-3 rounded-lg font-bold transition transform hover:scale-105" data-i18n="login_btn">
+                Увійти
+            </button>
+        </form>
+        <p class="text-center text-gray-400 mt-4">
+            <span data-i18n="no_account">Немає акаунту?</span> 
+            <a href="#" class="text-accent hover:underline" onclick="showRegister()" data-i18n="register_link">Зареєструватись</a>
+        </p>
+    </div>
+</div>
+
+<!-- Модальне вікно реєстрації -->
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold" data-i18n="register_title">Реєстрація</h3>
+            <button class="text-2xl hover:text-accent" onclick="closeModals()">×</button>
+        </div>
+        <form id="registerForm" class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium mb-2" data-i18n="first_name">Ім'я</label>
+                    <input type="text" id="regName" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2" data-i18n="last_name">Прізвище</label>
+                    <input type="text" id="regLastName" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3" required>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2" data-i18n="email">Email</label>
+                <input type="email" id="regEmail" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2" data-i18n="password">Пароль</label>
+                <div class="relative">
+                    <input type="password" id="regPassword" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 pr-12" required>
+                    <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-accent" 
+                       id="toggleRegPassword" onclick="togglePasswordVisibility('regPassword', 'toggleRegPassword')"></i>
+                </div>
+                <p class="text-xs text-gray-500 mt-1" data-i18n="password_hint">Мінімум 6 символів</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2" data-i18n="confirm_password">Підтвердіть пароль</label>
+                <div class="relative">
+                    <input type="password" id="regConfirm" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 pr-12" required>
+                    <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-accent" 
+                       id="toggleRegConfirm" onclick="togglePasswordVisibility('regConfirm', 'toggleRegConfirm')"></i>
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-accent hover:bg-blue-600 py-3 rounded-lg font-bold transition transform hover:scale-105" data-i18n="register_btn">
+                Зареєструватися
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Модальне вікно відновлення паролю -->
+<div id="forgotModal" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold" data-i18n="forgot_title">Відновлення паролю</h3>
+            <button class="text-2xl hover:text-accent" onclick="closeModals()">×</button>
+        </div>
+        
+        <!-- Крок 1: Email -->
+        <div id="step1" class="space-y-4">
+            <p class="text-gray-400" data-i18n="step1_text">Введіть email, на який зареєстрований акаунт</p>
+            <input type="email" id="resetEmail" placeholder="your@email.com" 
+                   class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3">
+            <button class="w-full bg-accent hover:bg-blue-600 py-3 rounded-lg font-bold transition transform hover:scale-105" onclick="sendResetCode()" data-i18n="send_code">
+                Надіслати код
+            </button>
+        </div>
+        
+        <!-- Крок 2: Код (спочатку прихований) -->
+        <div id="step2" class="space-y-4 hidden">
+            <p class="text-gray-400" data-i18n="step2_text">Введіть 6-значний код, який ми надіслали на вашу пошту</p>
+            <div class="flex justify-center space-x-2">
+                <input type="text" maxlength="1" class="code-input" onkeyup="moveToNext(this, 0)">
+                <input type="text" maxlength="1" class="code-input" onkeyup="moveToNext(this, 1)">
+                <input type="text" maxlength="1" class="code-input" onkeyup="moveToNext(this, 2)">
+                <input type="text" maxlength="1" class="code-input" onkeyup="moveToNext(this, 3)">
+                <input type="text" maxlength="1" class="code-input" onkeyup="moveToNext(this, 4)">
+                <input type="text" maxlength="1" class="code-input" onkeyup="moveToNext(this, 5)">
+            </div>
+            <p class="text-sm text-gray-500 text-center">
+                <span data-i18n="no_code">Не прийшов код?</span> 
+                <a href="#" class="text-accent hover:underline" onclick="sendResetCode()" data-i18n="resend">Надіслати ще раз</a>
+            </p>
+            <button class="w-full bg-accent hover:bg-blue-600 py-3 rounded-lg font-bold transition transform hover:scale-105" onclick="verifyCode()" data-i18n="verify">
+                Підтвердити
+            </button>
+        </div>
+        
+        <!-- Крок 3: Новий пароль (спочатку прихований) -->
+        <div id="step3" class="space-y-4 hidden">
+            <p class="text-gray-400" data-i18n="step3_text">Введіть новий пароль</p>
+            <div class="relative">
+                <input type="password" id="newPassword" placeholder="Новий пароль" 
+                       class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 pr-12">
+                <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-accent" 
+                   id="toggleNewPassword" onclick="togglePasswordVisibility('newPassword', 'toggleNewPassword')"></i>
+            </div>
+            <div class="relative">
+                <input type="password" id="confirmNewPassword" placeholder="Підтвердіть пароль" 
+                       class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 pr-12">
+                <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-accent" 
+                   id="toggleConfirmPassword" onclick="togglePasswordVisibility('confirmNewPassword', 'toggleConfirmPassword')"></i>
+            </div>
+            <button class="w-full bg-accent hover:bg-blue-600 py-3 rounded-lg font-bold transition transform hover:scale-105" onclick="changePassword()" data-i18n="change_password">
+                Змінити пароль
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальне вікно зміни плану -->
+<div id="changePlanModal" class="modal">
+    <div class="modal-content max-w-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold" data-i18n="change_plan_title">Зміна тарифного плану</h3>
+            <button class="text-2xl hover:text-accent" onclick="closeModals()">×</button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Basic -->
+            <div class="plan-card border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-accent transition" onclick="selectPlan('basic')">
+                <h4 class="font-bold text-lg">Basic</h4>
+                <p class="text-2xl font-bold text-accent">$49</p>
+                <p class="text-sm text-gray-400" data-i18n="per_month">/місяць</p>
+                <ul class="text-xs space-y-1 mt-2">
+                    <li>✓ 1,000 символів</li>
+                    <li>✓ 5 аналізів/день</li>
+                </ul>
+            </div>
+            
+            <!-- Business -->
+            <div class="plan-card border-2 border-accent rounded-lg p-4 cursor-pointer" onclick="selectPlan('business')">
+                <div class="bg-accent text-xs px-2 py-1 rounded-full inline-block mb-1">Популярний</div>
+                <h4 class="font-bold text-lg">Business</h4>
+                <p class="text-2xl font-bold text-accent">$149</p>
+                <p class="text-sm text-gray-400" data-i18n="per_month">/місяць</p>
+                <ul class="text-xs space-y-1 mt-2">
+                    <li>✓ 5,000 символів</li>
+                    <li>✓ 50 аналізів/день</li>
+                    <li>✓ API</li>
+                </ul>
+            </div>
+            
+            <!-- Enterprise -->
+            <div class="plan-card border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-gold transition" onclick="selectPlan('enterprise')">
+                <h4 class="font-bold text-lg">Enterprise</h4>
+                <p class="text-2xl font-bold text-gold">$249</p>
+                <p class="text-sm text-gray-400" data-i18n="per_month">/місяць</p>
+                <ul class="text-xs space-y-1 mt-2">
+                    <li>✓ Необмежено</li>
+                    <li>✓ Команда 10+</li>
+                    <li>✓ White Label</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="bg-accent/10 p-4 rounded-lg mb-4">
+            <p class="text-sm">
+                <span data-i18n="current_plan">Поточний план</span>: <span id="currentPlanName">Basic</span> ($<span id="currentPlanPrice">49</span>/<span data-i18n="month">міс</span>)
+            </p>
+            <p class="text-sm text-accent mt-1" id="planChangeDiff"></p>
+        </div>
+        
+        <div class="flex space-x-3">
+            <button class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-lg transition" onclick="closeModals()" data-i18n="cancel">
+                Скасувати
+            </button>
+            <button class="flex-1 bg-accent hover:bg-blue-600 py-3 rounded-lg font-bold transition transform hover:scale-105" onclick="confirmPlanChange()" data-i18n="confirm">
+                Підтвердити
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальне вікно історії -->
+<div id="historyModal" class="modal">
+    <div class="modal-content max-w-2xl max-h-[80vh] overflow-hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold" data-i18n="history_title">Історія аналізів</h3>
+            <button class="text-2xl hover:text-accent" onclick="closeModals()">×</button>
+        </div>
+        
+        <div class="space-y-3 overflow-y-auto max-h-96 pr-2" id="historyList">
+            <!-- Динамічно завантажується -->
+        </div>
+        
+        <button class="mt-4 w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-lg transition" onclick="closeModals()" data-i18n="close">
+            Закрити
+        </button>
+    </div>
+</div>
+
+<!-- Повідомлення про успіх з анімованою галочкою -->
+<div id="successToast" class="success-toast" style="display: none;">
+    <div class="success-checkmark">
+        <div class="check-icon">
+            <span class="icon-line line-tip"></span>
+            <span class="icon-line line-long"></span>
+            <div class="icon-circle"></div>
+        </div>
+    </div>
+    <div class="success-message" id="successMessage" data-i18n="password_changed">Пароль успішно змінено!</div>
+</div>
+
 <!-- AOS -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-<!-- МОДАЛЬНІ ВІКНА -->
-<div id="registerModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50">
-    <div class="bg-secondary rounded-2xl max-w-md w-full p-8">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold" data-key="register_title">Registration</h3>
-            <button id="closeRegisterModal" class="text-2xl hover:text-accent">&times;</button>
-        </div>
-        <form id="registerForm" class="space-y-4">
-            <input type="email" id="regEmail" placeholder="Email" class="w-full bg-primary border border-gray-700 rounded-lg p-3" required>
-            <input type="password" id="regPassword" placeholder="Password" class="w-full bg-primary border border-gray-700 rounded-lg p-3" required>
-            <input type="password" id="regConfirm" placeholder="Confirm Password" class="w-full bg-primary border border-gray-700 rounded-lg p-3" required>
-            <div class="flex items-center">
-                <input type="checkbox" id="regAgree" class="mr-2">
-                <label class="text-sm text-gray-400" data-key="agree">I agree to the terms of use</label>
-            </div>
-            <button type="submit" class="w-full bg-gradient-to-r from-accent to-purple py-3 rounded-lg font-bold" data-key="register_btn">Register</button>
-        </form>
-    </div>
-</div>
-
-<div id="loginModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50">
-    <div class="bg-secondary rounded-2xl max-w-md w-full p-8">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold" data-key="login_title">Login</h3>
-            <button id="closeLoginModal" class="text-2xl hover:text-accent">&times;</button>
-        </div>
-        <form id="loginForm" class="space-y-4">
-            <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-primary border border-gray-700 rounded-lg p-3" required>
-            <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-primary border border-gray-700 rounded-lg p-3" required>
-            <button type="submit" class="w-full bg-gradient-to-r from-accent to-purple py-3 rounded-lg font-bold" data-key="login_btn">Login</button>
-        </form>
-    </div>
-</div>
-
-<div id="privacyModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50">
-    <div class="bg-secondary rounded-2xl max-w-2xl w-full p-8 max-h-[80vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold" data-key="privacy_title">Privacy Policy</h3>
-            <button class="closeModal text-2xl hover:text-accent">&times;</button>
-        </div>
-        <div class="space-y-4 text-gray-300">
-            <p data-key="privacy_text1">We collect only necessary data for the service:</p>
-            <ul class="list-disc pl-5">
-                <li data-key="privacy_item1">Email - for identification and support</li>
-                <li data-key="privacy_item2">Texts for analysis - not stored after processing</li>
-                <li data-key="privacy_item3">Payment data - processed through secure payment systems</li>
-                <li data-key="privacy_item4">IP addresses - to protect against abuse</li>
-            </ul>
-            <p class="mt-4" data-key="privacy_text2">Under GDPR, you have the right to access, rectify and delete your data.</p>
-        </div>
-    </div>
-</div>
-
-<div id="termsModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50">
-    <div class="bg-secondary rounded-2xl max-w-2xl w-full p-8 max-h-[80vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold" data-key="terms_title">Terms of Use</h3>
-            <button class="closeModal text-2xl hover:text-accent">&times;</button>
-        </div>
-        <div class="space-y-4 text-gray-300">
-            <p data-key="terms_text1">1. By using AI PROOF, you agree to these terms.</p>
-            <p data-key="terms_text2">2. All texts are processed encrypted and not stored.</p>
-            <p data-key="terms_text3">3. Payment is made through secure payment systems.</p>
-            <p data-key="terms_text4">4. We are not responsible for decisions based on analysis results.</p>
-            <p data-key="terms_text5">5. Subscription automatically renews unless canceled before the payment date.</p>
-        </div>
-    </div>
-</div>
-
 <script>
     // Ініціалізація AOS
-    AOS.init({ duration: 800, once: true });
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+    });
+
+    // ========== ГЛОБАЛЬНІ ЗМІННІ ==========
+    let currentUser = null;
+    let resetCode = null;
+    let selectedNewPlan = null;
     
-    // ========== ПЕРЕКЛАДИ ==========
+    // Плани
+    const plans = {
+        'basic': { 
+            name: 'Basic', 
+            price: 49, 
+            limit: 5, 
+            chars: 1000,
+            accuracy: 0.95,
+            icon: 'fas fa-rocket'
+        },
+        'business': { 
+            name: 'Business', 
+            price: 149, 
+            limit: 50, 
+            chars: 5000,
+            accuracy: 0.97,
+            icon: 'fas fa-briefcase'
+        },
+        'enterprise': { 
+            name: 'Enterprise', 
+            price: 249, 
+            limit: Infinity, 
+            chars: Infinity,
+            accuracy: 0.99,
+            icon: 'fas fa-crown'
+        }
+    };
+    
+    // Переклади для 5 мов
     const translations = {
         'uk': {
+            // Навігація
             'detector': 'Детектор',
             'features': 'Можливості',
             'pricing': 'Тарифи',
             'about': 'Про нас',
             'login': 'Вхід',
             'register': 'Реєстрація',
+            
+            // Герой
+            'premium_badge': '✦ ПРЕМІУМ AI ДЕТЕКТОР ✦',
             'hero_title': 'Детектор',
-            'hero_subtitle': 'Точність 99% для 5 мов. Захистіть свій бізнес від AI-контенту з професійним інструментом.',
+            'hero_subtitle': 'ШТУЧНОГО ІНТЕЛЕКТУ',
+            'hero_description': 'Точність 99% для 5 мов. Захистіть свій бізнес від AI-контенту.',
+            
+            // Детектор
             'enter_text': 'Введіть текст для аналізу',
+            'free_plan': 'Безкоштовно',
             'free_chars': 'Перші 1000 символів безкоштовно',
             'analyze': 'Проаналізувати',
+            'left_today': 'залишилось сьогодні',
+            
+            // Результати
+            'analysis_result': 'Результат аналізу',
+            'ai_probability': 'ймовірність AI',
+            'words': 'слів',
+            'chars': 'символів',
+            'sentences': 'речень',
+            'reading_time': 'хв читання',
+            'detailed_analysis': 'Детальний аналіз',
+            'perplexity': 'Perplexity',
+            'burstiness': 'Burstiness',
+            'pattern': 'Pattern',
+            'save': 'Зберегти',
+            'copy': 'Копіювати',
+            'share': 'Поділитись',
+            
+            // Можливості
             'features_title': 'Преміальні',
+            'features_gradient': 'можливості',
             'features_subtitle': 'Все, що потрібно для професійної перевірки текстів',
             'feature1_title': 'Потрійний алгоритм',
             'feature1_desc': 'Perplexity, Burstiness та Pattern analysis для максимальної точності 99%',
             'feature2_title': '5 європейських мов',
             'feature2_desc': 'Українська, англійська, польська, німецька, французька',
             'feature3_title': 'Детальна аналітика',
-            'feature3_desc': 'Повний звіт з графіками, статистикою та експортом в PDF',
+            'feature3_desc': 'Повний звіт з графіками, статистикою та експортом',
+            
+            // Тарифи
             'pricing_title': 'Оберіть свій',
+            'pricing_gradient': 'тариф',
             'pricing_subtitle': 'Прозорі ціни без прихованих платежів',
             'starter': 'Стартовий',
             'basic_name': 'Basic',
-            'per_month': 'місяць',
+            'month': 'міс',
             'basic_feature1': '1,000 символів за раз',
             'basic_feature2': '5 аналізів на день',
             'basic_feature3': 'Базовий звіт',
@@ -583,8 +1293,8 @@
             'business_name': 'Business',
             'business_feature1': '5,000 символів за раз',
             'business_feature2': '50 аналізів на день',
-            'business_feature3': 'Детальний звіт + PDF',
-            'business_feature4': 'API (100 запитів/день)',
+            'business_feature3': 'Детальний звіт',
+            'business_feature4': 'API (100/день)',
             'business_feature5': 'Пріоритетна підтримка',
             'corporate': 'Корпоративний',
             'enterprise_name': 'Enterprise',
@@ -594,9 +1304,13 @@
             'enterprise_feature4': 'White Label',
             'enterprise_feature5': 'Преміум API',
             'enterprise_feature6': 'Персональний менеджер',
+            
+            // Про нас
             'about_title': 'Про компанію',
-            'about_text1': 'AI PROOF — це українська технологічна компанія, що спеціалізується на розробці AI-детекторів для бізнесу та освіти. Наша місія — зробити інтернет чистішим та захистити академічну доброчесність.',
-            'about_text2': 'Заснована у 2024 році, команда AI PROOF об\'єднала досвідчених розробників та AI-експертів з усієї Європи. Ми працюємо 24/7, щоб забезпечити найкращий сервіс.',
+            'about_text1': 'AI PROOF — це українська технологічна компанія, що спеціалізується на розробці AI-детекторів для бізнесу та освіти.',
+            'about_text2': 'Заснована у 2024 році, команда AI PROOF об\'єднала досвідчених розробників та AI-експертів з усієї Європи.',
+            
+            // Футер
             'footer_text': 'Преміальний AI детектор для бізнесу',
             'product': 'Продукт',
             'company': 'Компанія',
@@ -604,57 +1318,106 @@
             'terms': 'Умови використання',
             'support': 'Підтримка',
             'rights': 'Всі права захищені',
-            'register_title': 'Реєстрація',
-            'agree': 'Я погоджуюсь з умовами використання',
-            'register_btn': 'Зареєструватися',
+            
+            // Модальні вікна
             'login_title': 'Вхід',
+            'register_title': 'Реєстрація',
+            'email': 'Email',
+            'password': 'Пароль',
+            'forgot_password': 'Забули пароль?',
             'login_btn': 'Увійти',
-            'privacy_title': 'Політика конфіденційності',
-            'privacy_text1': 'Ми збираємо тільки необхідні дані для роботи сервісу:',
-            'privacy_item1': 'Email - для ідентифікації та підтримки',
-            'privacy_item2': 'Тексти для аналізу - не зберігаються після обробки',
-            'privacy_item3': 'Платіжні дані - обробляються через захищені платіжні системи',
-            'privacy_item4': 'IP адреси - для захисту від зловживань',
-            'privacy_text2': 'Відповідно до GDPR, ви маєте право на доступ, виправлення та видалення своїх даних.',
-            'terms_title': 'Умови використання',
-            'terms_text1': '1. Використовуючи AI PROOF, ви погоджуєтесь з даними умовами.',
-            'terms_text2': '2. Всі тексти обробляються в зашифрованому вигляді та не зберігаються.',
-            'terms_text3': '3. Оплата здійснюється через захищені платіжні системи.',
-            'terms_text4': '4. Ми не несемо відповідальності за рішення, прийняті на основі результатів аналізу.',
-            'terms_text5': '5. Підписка автоматично поновлюється, якщо не скасована до дати оплати.',
-            'legal_title': '⚠️ ВАЖЛИВА ЮРИДИЧНА ІНФОРМАЦІЯ:',
-            'legal_line1': 'Результати аналізу надаються "як є" на основі AI-алгоритмів з точністю ~95-99%.',
-            'legal_line2': 'AI PROOF не гарантує 100% точність визначення AI-контенту.',
-            'legal_line3': 'Даний звіт є допоміжним інструментом, а не експертним висновком.',
-            'legal_line4': 'Компанія не несе відповідальності за рішення, прийняті на основі цього звіту.',
-            'legal_line5': 'Для юридично значимих рішень рекомендується звернутись до професійних експертів.',
-            'legal_auto': 'Це автоматичне повідомлення, будь ласка, не відповідайте на нього.'
+            'no_account': 'Немає акаунту?',
+            'register_link': 'Зареєструватись',
+            'first_name': 'Ім\'я',
+            'last_name': 'Прізвище',
+            'confirm_password': 'Підтвердіть пароль',
+            'password_hint': 'Мінімум 6 символів',
+            'register_btn': 'Зареєструватися',
+            
+            // Відновлення паролю
+            'forgot_title': 'Відновлення паролю',
+            'step1_text': 'Введіть email, на який зареєстрований акаунт',
+            'send_code': 'Надіслати код',
+            'step2_text': 'Введіть 6-значний код, який ми надіслали на вашу пошту',
+            'no_code': 'Не прийшов код?',
+            'resend': 'Надіслати ще раз',
+            'verify': 'Підтвердити',
+            'step3_text': 'Введіть новий пароль',
+            'change_password': 'Змінити пароль',
+            'code_sent': 'Код відправлено!',
+            'password_changed': 'Пароль успішно змінено!',
+            
+            // Профіль
+            'current_plan': 'Поточний план',
+            'analyses_today': 'сьогодні',
+            'expires': 'Діє до',
+            'change_plan': 'Змінити план',
+            'history': 'Історія аналізів',
+            'settings': 'Налаштування',
+            'logout': 'Вийти',
+            
+            // Інше
+            'cancel': 'Скасувати',
+            'confirm': 'Підтвердити',
+            'close': 'Закрити',
+            'per_month': '/місяць',
+            'change_plan_title': 'Зміна тарифного плану'
         },
         'en': {
+            // Navigation
             'detector': 'Detector',
             'features': 'Features',
             'pricing': 'Pricing',
             'about': 'About',
             'login': 'Login',
             'register': 'Register',
-            'hero_title': 'AI Text',
-            'hero_subtitle': '99% accuracy for 5 languages. Protect your business from AI-content with professional tool.',
+            
+            // Hero
+            'premium_badge': '✦ PREMIUM AI DETECTOR ✦',
+            'hero_title': 'AI',
+            'hero_subtitle': 'TEXT DETECTOR',
+            'hero_description': '99% accuracy for 5 languages. Protect your business from AI-content.',
+            
+            // Detector
             'enter_text': 'Enter text for analysis',
+            'free_plan': 'Free',
             'free_chars': 'First 1000 characters free',
             'analyze': 'Analyze',
+            'left_today': 'left today',
+            
+            // Results
+            'analysis_result': 'Analysis Result',
+            'ai_probability': 'AI probability',
+            'words': 'words',
+            'chars': 'characters',
+            'sentences': 'sentences',
+            'reading_time': 'min read',
+            'detailed_analysis': 'Detailed Analysis',
+            'perplexity': 'Perplexity',
+            'burstiness': 'Burstiness',
+            'pattern': 'Pattern',
+            'save': 'Save',
+            'copy': 'Copy',
+            'share': 'Share',
+            
+            // Features
             'features_title': 'Premium',
+            'features_gradient': 'Features',
             'features_subtitle': 'Everything you need for professional text verification',
-            'feature1_title': 'Triple algorithm',
-            'feature1_desc': 'Perplexity, Burstiness and Pattern analysis for maximum 99% accuracy',
-            'feature2_title': '5 European languages',
+            'feature1_title': 'Triple Algorithm',
+            'feature1_desc': 'Perplexity, Burstiness and Pattern analysis for 99% accuracy',
+            'feature2_title': '5 Languages',
             'feature2_desc': 'English, Ukrainian, Polish, German, French',
-            'feature3_title': 'Detailed analytics',
-            'feature3_desc': 'Full report with charts, statistics and PDF export',
+            'feature3_title': 'Detailed Analytics',
+            'feature3_desc': 'Full report with charts, statistics and export',
+            
+            // Pricing
             'pricing_title': 'Choose your',
+            'pricing_gradient': 'Plan',
             'pricing_subtitle': 'Transparent prices with no hidden fees',
             'starter': 'Starter',
             'basic_name': 'Basic',
-            'per_month': 'month',
+            'month': 'mo',
             'basic_feature1': '1,000 chars per analysis',
             'basic_feature2': '5 analyses per day',
             'basic_feature3': 'Basic report',
@@ -665,8 +1428,8 @@
             'business_name': 'Business',
             'business_feature1': '5,000 chars per analysis',
             'business_feature2': '50 analyses per day',
-            'business_feature3': 'Detailed report + PDF',
-            'business_feature4': 'API (100 requests/day)',
+            'business_feature3': 'Detailed report',
+            'business_feature4': 'API (100/day)',
             'business_feature5': 'Priority support',
             'corporate': 'Corporate',
             'enterprise_name': 'Enterprise',
@@ -676,9 +1439,13 @@
             'enterprise_feature4': 'White Label',
             'enterprise_feature5': 'Premium API',
             'enterprise_feature6': 'Personal manager',
+            
+            // About
             'about_title': 'About Company',
-            'about_text1': 'AI PROOF is a Ukrainian technology company specializing in AI detectors for business and education. Our mission is to make the internet cleaner and protect academic integrity.',
-            'about_text2': 'Founded in 2024, the AI PROOF team brought together experienced developers and AI experts from across Europe. We work 24/7 to provide the best service.',
+            'about_text1': 'AI PROOF is a Ukrainian technology company specializing in AI detectors for business and education.',
+            'about_text2': 'Founded in 2024, the AI PROOF team brought together experienced developers and AI experts from across Europe.',
+            
+            // Footer
             'footer_text': 'Premium AI detector for business',
             'product': 'Product',
             'company': 'Company',
@@ -686,69 +1453,118 @@
             'terms': 'Terms of Use',
             'support': 'Support',
             'rights': 'All rights reserved',
-            'register_title': 'Registration',
-            'agree': 'I agree to the terms of use',
-            'register_btn': 'Register',
+            
+            // Modals
             'login_title': 'Login',
+            'register_title': 'Registration',
+            'email': 'Email',
+            'password': 'Password',
+            'forgot_password': 'Forgot password?',
             'login_btn': 'Login',
-            'privacy_title': 'Privacy Policy',
-            'privacy_text1': 'We collect only necessary data for the service:',
-            'privacy_item1': 'Email - for identification and support',
-            'privacy_item2': 'Texts for analysis - not stored after processing',
-            'privacy_item3': 'Payment data - processed through secure payment systems',
-            'privacy_item4': 'IP addresses - to protect against abuse',
-            'privacy_text2': 'Under GDPR, you have the right to access, rectify and delete your data.',
-            'terms_title': 'Terms of Use',
-            'terms_text1': '1. By using AI PROOF, you agree to these terms.',
-            'terms_text2': '2. All texts are processed encrypted and not stored.',
-            'terms_text3': '3. Payment is made through secure payment systems.',
-            'terms_text4': '4. We are not responsible for decisions based on analysis results.',
-            'terms_text5': '5. Subscription automatically renews unless canceled before the payment date.',
-            'legal_title': '⚠️ IMPORTANT LEGAL INFORMATION:',
-            'legal_line1': 'Analysis results are provided "as is" based on AI algorithms with ~95-99% accuracy.',
-            'legal_line2': 'AI PROOF does not guarantee 100% accuracy in detecting AI content.',
-            'legal_line3': 'This report is a supporting tool, not an expert opinion.',
-            'legal_line4': 'The company is not responsible for decisions made based on this report.',
-            'legal_line5': 'For legally significant decisions, please consult professional experts.',
-            'legal_auto': 'This is an automated message, please do not reply.'
+            'no_account': 'No account?',
+            'register_link': 'Register',
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
+            'confirm_password': 'Confirm Password',
+            'password_hint': 'Minimum 6 characters',
+            'register_btn': 'Register',
+            
+            // Password recovery
+            'forgot_title': 'Password Recovery',
+            'step1_text': 'Enter the email associated with your account',
+            'send_code': 'Send Code',
+            'step2_text': 'Enter the 6-digit code sent to your email',
+            'no_code': 'No code?',
+            'resend': 'Resend',
+            'verify': 'Verify',
+            'step3_text': 'Enter new password',
+            'change_password': 'Change Password',
+            'code_sent': 'Code sent!',
+            'password_changed': 'Password changed successfully!',
+            
+            // Profile
+            'current_plan': 'Current Plan',
+            'analyses_today': 'today',
+            'expires': 'Expires',
+            'change_plan': 'Change Plan',
+            'history': 'History',
+            'settings': 'Settings',
+            'logout': 'Logout',
+            
+            // Other
+            'cancel': 'Cancel',
+            'confirm': 'Confirm',
+            'close': 'Close',
+            'per_month': '/month',
+            'change_plan_title': 'Change Plan'
         },
         'pl': {
+            // Navigation
             'detector': 'Detektor',
             'features': 'Funkcje',
             'pricing': 'Ceny',
             'about': 'O nas',
             'login': 'Logowanie',
             'register': 'Rejestracja',
-            'hero_title': 'Detektor AI',
-            'hero_subtitle': '99% dokładności dla 5 języków. Chroń swój biznes przed AI-treścią profesjonalnym narzędziem.',
+            
+            // Hero
+            'premium_badge': '✦ PREMIUM AI DETEKTOR ✦',
+            'hero_title': 'Detektor',
+            'hero_subtitle': 'TEKSTÓW AI',
+            'hero_description': '99% dokładności dla 5 języków. Chroń swój biznes przed treściami AI.',
+            
+            // Detector
             'enter_text': 'Wprowadź tekst do analizy',
+            'free_plan': 'Darmowy',
             'free_chars': 'Pierwsze 1000 znaków za darmo',
             'analyze': 'Analizuj',
+            'left_today': 'zostało dzisiaj',
+            
+            // Results
+            'analysis_result': 'Wynik analizy',
+            'ai_probability': 'prawdopodobieństwo AI',
+            'words': 'słów',
+            'chars': 'znaków',
+            'sentences': 'zdań',
+            'reading_time': 'min czytania',
+            'detailed_analysis': 'Szczegółowa analiza',
+            'perplexity': 'Perplexity',
+            'burstiness': 'Burstiness',
+            'pattern': 'Pattern',
+            'save': 'Zapisz',
+            'copy': 'Kopiuj',
+            'share': 'Udostępnij',
+            
+            // Features
             'features_title': 'Premium',
+            'features_gradient': 'funkcje',
             'features_subtitle': 'Wszystko czego potrzebujesz do profesjonalnej weryfikacji tekstów',
             'feature1_title': 'Potrójny algorytm',
-            'feature1_desc': 'Perplexity, Burstiness i analiza wzorców dla maksymalnej dokładności 99%',
-            'feature2_title': '5 języków europejskich',
+            'feature1_desc': 'Perplexity, Burstiness i analiza wzorców dla 99% dokładności',
+            'feature2_title': '5 języków',
             'feature2_desc': 'Angielski, ukraiński, polski, niemiecki, francuski',
             'feature3_title': 'Szczegółowa analityka',
-            'feature3_desc': 'Pełny raport z wykresami, statystykami i eksportem PDF',
+            'feature3_desc': 'Pełny raport z wykresami, statystykami i eksportem',
+            
+            // Pricing
             'pricing_title': 'Wybierz swój',
+            'pricing_gradient': 'plan',
             'pricing_subtitle': 'Przejrzyste ceny bez ukrytych opłat',
             'starter': 'Startowy',
             'basic_name': 'Basic',
-            'per_month': 'miesiąc',
+            'month': 'msc',
             'basic_feature1': '1,000 znaków na analizę',
             'basic_feature2': '5 analiz dziennie',
             'basic_feature3': 'Podstawowy raport',
             'basic_feature4': 'Wsparcie email',
             'choose_plan': 'Wybierz plan',
-            'popular': 'NAJBARDZIEJ POPULARNY',
+            'popular': 'NAJPOPULARNIEJSZY',
             'professional': 'Profesjonalny',
             'business_name': 'Business',
             'business_feature1': '5,000 znaków na analizę',
             'business_feature2': '50 analiz dziennie',
-            'business_feature3': 'Szczegółowy raport + PDF',
-            'business_feature4': 'API (100 zapytań/dzień)',
+            'business_feature3': 'Szczegółowy raport',
+            'business_feature4': 'API (100/dzień)',
             'business_feature5': 'Priorytetowe wsparcie',
             'corporate': 'Korporacyjny',
             'enterprise_name': 'Enterprise',
@@ -758,9 +1574,13 @@
             'enterprise_feature4': 'White Label',
             'enterprise_feature5': 'Premium API',
             'enterprise_feature6': 'Menedżer osobisty',
+            
+            // About
             'about_title': 'O firmie',
-            'about_text1': 'AI PROOF to ukraińska firma technologiczna specjalizująca się w detektorach AI dla biznesu i edukacji. Naszą misją jest uczynienie internetu czystszym i ochrona uczciwości akademickiej.',
-            'about_text2': 'Założona w 2024 roku, zespół AI PROOF zrzesza doświadczonych programistów i ekspertów AI z całej Europy. Pracujemy 24/7, aby zapewnić najlepszą obsługę.',
+            'about_text1': 'AI PROOF to ukraińska firma technologiczna specjalizująca się w detektorach AI dla biznesu i edukacji.',
+            'about_text2': 'Założona w 2024 roku, zespół AI PROOF zrzesza doświadczonych programistów i ekspertów AI z całej Europy.',
+            
+            // Footer
             'footer_text': 'Premium detektor AI dla biznesu',
             'product': 'Produkt',
             'company': 'Firma',
@@ -768,57 +1588,106 @@
             'terms': 'Warunki użytkowania',
             'support': 'Wsparcie',
             'rights': 'Wszelkie prawa zastrzeżone',
-            'register_title': 'Rejestracja',
-            'agree': 'Akceptuję warunki użytkowania',
-            'register_btn': 'Zarejestruj się',
+            
+            // Modals
             'login_title': 'Logowanie',
+            'register_title': 'Rejestracja',
+            'email': 'Email',
+            'password': 'Hasło',
+            'forgot_password': 'Zapomniałeś hasła?',
             'login_btn': 'Zaloguj się',
-            'privacy_title': 'Polityka prywatności',
-            'privacy_text1': 'Zbieramy tylko niezbędne dane do działania usługi:',
-            'privacy_item1': 'Email - do identyfikacji i wsparcia',
-            'privacy_item2': 'Teksty do analizy - nie są przechowywane po przetworzeniu',
-            'privacy_item3': 'Dane płatności - przetwarzane przez bezpieczne systemy płatności',
-            'privacy_item4': 'Adresy IP - w celu ochrony przed nadużyciami',
-            'privacy_text2': 'Zgodnie z RODO, masz prawo dostępu, sprostowania i usunięcia swoich danych.',
-            'terms_title': 'Warunki użytkowania',
-            'terms_text1': '1. Korzystając z AI PROOF, akceptujesz niniejsze warunki.',
-            'terms_text2': '2. Wszystkie teksty są przetwarzane w formie zaszyfrowanej i nie są przechowywane.',
-            'terms_text3': '3. Płatność odbywa się za pośrednictwem bezpiecznych systemów płatności.',
-            'terms_text4': '4. Nie ponosimy odpowiedzialności za decyzje podjęte na podstawie wyników analizy.',
-            'terms_text5': '5. Subskrypcja odnawia się automatycznie, chyba że zostanie anulowana przed terminem płatności.',
-            'legal_title': '⚠️ WAŻNE INFORMACJE PRAWNE:',
-            'legal_line1': 'Wyniki analizy są dostarczane "tak jak są" w oparciu o algorytmy AI z dokładnością ~95-99%.',
-            'legal_line2': 'AI PROOF nie gwarantuje 100% dokładności wykrywania treści AI.',
-            'legal_line3': 'Ten raport jest narzędziem pomocniczym, a nie opinią ekspercką.',
-            'legal_line4': 'Firma nie ponosi odpowiedzialności za decyzje podjęte na podstawie tego raportu.',
-            'legal_line5': 'W przypadku decyzji o znaczeniu prawnym zaleca się konsultację z profesjonalnymi ekspertami.',
-            'legal_auto': 'To jest wiadomość automatyczna, prosimy na nią nie odpowiadać.'
+            'no_account': 'Nie masz konta?',
+            'register_link': 'Zarejestruj się',
+            'first_name': 'Imię',
+            'last_name': 'Nazwisko',
+            'confirm_password': 'Potwierdź hasło',
+            'password_hint': 'Minimum 6 znaków',
+            'register_btn': 'Zarejestruj się',
+            
+            // Password recovery
+            'forgot_title': 'Odzyskiwanie hasła',
+            'step1_text': 'Wprowadź email powiązany z kontem',
+            'send_code': 'Wyślij kod',
+            'step2_text': 'Wprowadź 6-cyfrowy kod wysłany na email',
+            'no_code': 'Nie otrzymałeś kodu?',
+            'resend': 'Wyślij ponownie',
+            'verify': 'Potwierdź',
+            'step3_text': 'Wprowadź nowe hasło',
+            'change_password': 'Zmień hasło',
+            'code_sent': 'Kod wysłany!',
+            'password_changed': 'Hasło zmienione pomyślnie!',
+            
+            // Profile
+            'current_plan': 'Aktualny plan',
+            'analyses_today': 'dzisiaj',
+            'expires': 'Wygasa',
+            'change_plan': 'Zmień plan',
+            'history': 'Historia',
+            'settings': 'Ustawienia',
+            'logout': 'Wyloguj się',
+            
+            // Other
+            'cancel': 'Anuluj',
+            'confirm': 'Potwierdź',
+            'close': 'Zamknij',
+            'per_month': '/miesiąc',
+            'change_plan_title': 'Zmień plan'
         },
         'de': {
+            // Navigation
             'detector': 'Detektor',
             'features': 'Funktionen',
             'pricing': 'Preise',
             'about': 'Über uns',
             'login': 'Anmelden',
             'register': 'Registrieren',
-            'hero_title': 'AI-Detektor',
-            'hero_subtitle': '99% Genauigkeit für 5 Sprachen. Schützen Sie Ihr Unternehmen mit professionellem Tool vor AI-Inhalten.',
+            
+            // Hero
+            'premium_badge': '✦ PREMIUM AI DETEKTOR ✦',
+            'hero_title': 'AI',
+            'hero_subtitle': 'DETEKTOR',
+            'hero_description': '99% Genauigkeit für 5 Sprachen. Schützen Sie Ihr Unternehmen vor AI-Inhalten.',
+            
+            // Detector
             'enter_text': 'Text zur Analyse eingeben',
+            'free_plan': 'Kostenlos',
             'free_chars': 'Erste 1000 Zeichen kostenlos',
             'analyze': 'Analysieren',
+            'left_today': 'heute übrig',
+            
+            // Results
+            'analysis_result': 'Analyseergebnis',
+            'ai_probability': 'AI-Wahrscheinlichkeit',
+            'words': 'Wörter',
+            'chars': 'Zeichen',
+            'sentences': 'Sätze',
+            'reading_time': 'Min Lesezeit',
+            'detailed_analysis': 'Detaillierte Analyse',
+            'perplexity': 'Perplexität',
+            'burstiness': 'Burstiness',
+            'pattern': 'Muster',
+            'save': 'Speichern',
+            'copy': 'Kopieren',
+            'share': 'Teilen',
+            
+            // Features
             'features_title': 'Premium',
-            'features_subtitle': 'Alles, was Sie für die professionelle Textprüfung benötigen',
-            'feature1_title': 'Dreifacher Algorithmus',
-            'feature1_desc': 'Perplexity, Burstiness und Musteranalyse für maximale 99% Genauigkeit',
-            'feature2_title': '5 europäische Sprachen',
+            'features_gradient': 'Funktionen',
+            'features_subtitle': 'Alles für die professionelle Textprüfung',
+            'feature1_title': 'Dreifach-Algorithmus',
+            'feature1_desc': 'Perplexität, Burstiness und Musteranalyse für 99% Genauigkeit',
+            'feature2_title': '5 Sprachen',
             'feature2_desc': 'Englisch, Ukrainisch, Polnisch, Deutsch, Französisch',
             'feature3_title': 'Detaillierte Analysen',
-            'feature3_desc': 'Vollständiger Bericht mit Diagrammen, Statistiken und PDF-Export',
+            'feature3_desc': 'Vollständiger Bericht mit Diagrammen und Statistiken',
+            
+            // Pricing
             'pricing_title': 'Wählen Sie Ihren',
+            'pricing_gradient': 'Plan',
             'pricing_subtitle': 'Transparente Preise ohne versteckte Gebühren',
             'starter': 'Einstieg',
             'basic_name': 'Basic',
-            'per_month': 'Monat',
+            'month': 'Mon',
             'basic_feature1': '1.000 Zeichen pro Analyse',
             'basic_feature2': '5 Analysen pro Tag',
             'basic_feature3': 'Basisbericht',
@@ -829,8 +1698,8 @@
             'business_name': 'Business',
             'business_feature1': '5.000 Zeichen pro Analyse',
             'business_feature2': '50 Analysen pro Tag',
-            'business_feature3': 'Detaillierter Bericht + PDF',
-            'business_feature4': 'API (100 Anfragen/Tag)',
+            'business_feature3': 'Detaillierter Bericht',
+            'business_feature4': 'API (100/Tag)',
             'business_feature5': 'Prioritäts-Support',
             'corporate': 'Unternehmen',
             'enterprise_name': 'Enterprise',
@@ -838,11 +1707,15 @@
             'enterprise_feature2': 'Unbegrenzte Analysen',
             'enterprise_feature3': 'Teamzugriff (10+)',
             'enterprise_feature4': 'White Label',
-            'enterprise_feature5': 'Premium-API',
+            'enterprise_feature5': 'Premium API',
             'enterprise_feature6': 'Persönlicher Manager',
-            'about_title': 'Über das Unternehmen',
-            'about_text1': 'AI PROOF ist ein ukrainisches Technologieunternehmen, das sich auf KI-Detektoren für Unternehmen und Bildung spezialisiert hat. Unsere Mission ist es, das Internet sauberer zu machen und die akademische Integrität zu schützen.',
-            'about_text2': 'Das 2024 gegründete Team von AI PROOF vereint erfahrene Entwickler und KI-Experten aus ganz Europa. Wir arbeiten 24/7, um den besten Service zu bieten.',
+            
+            // About
+            'about_title': 'Über uns',
+            'about_text1': 'AI PROOF ist ein ukrainisches Technologieunternehmen, das sich auf KI-Detektoren für Unternehmen und Bildung spezialisiert hat.',
+            'about_text2': 'Gegründet 2024, vereint das Team von AI PROOF erfahrene Entwickler und KI-Experten aus ganz Europa.',
+            
+            // Footer
             'footer_text': 'Premium-KI-Detektor für Unternehmen',
             'product': 'Produkt',
             'company': 'Unternehmen',
@@ -850,57 +1723,106 @@
             'terms': 'Nutzungsbedingungen',
             'support': 'Support',
             'rights': 'Alle Rechte vorbehalten',
-            'register_title': 'Registrierung',
-            'agree': 'Ich stimme den Nutzungsbedingungen zu',
-            'register_btn': 'Registrieren',
+            
+            // Modals
             'login_title': 'Anmelden',
+            'register_title': 'Registrieren',
+            'email': 'E-Mail',
+            'password': 'Passwort',
+            'forgot_password': 'Passwort vergessen?',
             'login_btn': 'Einloggen',
-            'privacy_title': 'Datenschutzerklärung',
-            'privacy_text1': 'Wir sammeln nur notwendige Daten für den Dienst:',
-            'privacy_item1': 'E-Mail - zur Identifizierung und Unterstützung',
-            'privacy_item2': 'Texte zur Analyse - werden nach der Verarbeitung nicht gespeichert',
-            'privacy_item3': 'Zahlungsdaten - werden über sichere Zahlungssysteme abgewickelt',
-            'privacy_item4': 'IP-Adressen - zum Schutz vor Missbrauch',
-            'privacy_text2': 'Gemäß der DSGVO haben Sie das Recht auf Zugang, Berichtigung und Löschung Ihrer Daten.',
-            'terms_title': 'Nutzungsbedingungen',
-            'terms_text1': '1. Durch die Nutzung von AI PROOF stimmen Sie diesen Bedingungen zu.',
-            'terms_text2': '2. Alle Texte werden verschlüsselt verarbeitet und nicht gespeichert.',
-            'terms_text3': '3. Die Zahlung erfolgt über sichere Zahlungssysteme.',
-            'terms_text4': '4. Wir übernehmen keine Haftung für Entscheidungen, die auf der Grundlage von Analyseergebnissen getroffen werden.',
-            'terms_text5': '5. Das Abonnement verlängert sich automatisch, wenn es nicht vor dem Zahlungstermin gekündigt wird.',
-            'legal_title': '⚠️ WICHTIGE RECHTLICHE INFORMATIONEN:',
-            'legal_line1': 'Die Analyseergebnisse werden "wie besehen" auf der Grundlage von KI-Algorithmen mit einer Genauigkeit von ~95-99% bereitgestellt.',
-            'legal_line2': 'AI PROOF garantiert keine 100%ige Genauigkeit bei der Erkennung von KI-Inhalten.',
-            'legal_line3': 'Dieser Bericht ist ein Hilfsmittel, kein Expertenurteil.',
-            'legal_line4': 'Das Unternehmen haftet nicht für Entscheidungen, die auf der Grundlage dieses Berichts getroffen werden.',
-            'legal_line5': 'Für rechtlich bedeutsame Entscheidungen wird empfohlen, professionelle Experten zu konsultieren.',
-            'legal_auto': 'Dies ist eine automatisch generierte Nachricht, bitte antworten Sie nicht darauf.'
+            'no_account': 'Kein Konto?',
+            'register_link': 'Registrieren',
+            'first_name': 'Vorname',
+            'last_name': 'Nachname',
+            'confirm_password': 'Passwort bestätigen',
+            'password_hint': 'Mindestens 6 Zeichen',
+            'register_btn': 'Registrieren',
+            
+            // Password recovery
+            'forgot_title': 'Passwort wiederherstellen',
+            'step1_text': 'Geben Sie die E-Mail-Adresse Ihres Kontos ein',
+            'send_code': 'Code senden',
+            'step2_text': 'Geben Sie den 6-stelligen Code ein',
+            'no_code': 'Kein Code erhalten?',
+            'resend': 'Erneut senden',
+            'verify': 'Bestätigen',
+            'step3_text': 'Neues Passwort eingeben',
+            'change_password': 'Passwort ändern',
+            'code_sent': 'Code gesendet!',
+            'password_changed': 'Passwort erfolgreich geändert!',
+            
+            // Profile
+            'current_plan': 'Aktueller Plan',
+            'analyses_today': 'heute',
+            'expires': 'Gültig bis',
+            'change_plan': 'Plan ändern',
+            'history': 'Verlauf',
+            'settings': 'Einstellungen',
+            'logout': 'Abmelden',
+            
+            // Other
+            'cancel': 'Abbrechen',
+            'confirm': 'Bestätigen',
+            'close': 'Schließen',
+            'per_month': '/Monat',
+            'change_plan_title': 'Plan ändern'
         },
         'fr': {
+            // Navigation
             'detector': 'Détecteur',
             'features': 'Fonctions',
             'pricing': 'Tarifs',
             'about': 'À propos',
             'login': 'Connexion',
             'register': 'Inscription',
-            'hero_title': 'Détecteur IA',
-            'hero_subtitle': '99% de précision pour 5 langues. Protégez votre entreprise du contenu IA avec un outil professionnel.',
+            
+            // Hero
+            'premium_badge': '✦ DÉTECTEUR IA PREMIUM ✦',
+            'hero_title': 'Détecteur',
+            'hero_subtitle': 'DE TEXTES IA',
+            'hero_description': '99% de précision pour 5 langues. Protégez votre entreprise du contenu IA.',
+            
+            // Detector
             'enter_text': 'Entrez le texte à analyser',
+            'free_plan': 'Gratuit',
             'free_chars': 'Premiers 1000 caractères gratuits',
             'analyze': 'Analyser',
-            'features_title': 'Premium',
-            'features_subtitle': 'Tout ce dont vous avez besoin pour une vérification professionnelle des textes',
+            'left_today': 'reste aujourd\'hui',
+            
+            // Results
+            'analysis_result': 'Résultat de l\'analyse',
+            'ai_probability': 'probabilité IA',
+            'words': 'mots',
+            'chars': 'caractères',
+            'sentences': 'phrases',
+            'reading_time': 'min de lecture',
+            'detailed_analysis': 'Analyse détaillée',
+            'perplexity': 'Perplexité',
+            'burstiness': 'Burstiness',
+            'pattern': 'Motif',
+            'save': 'Enregistrer',
+            'copy': 'Copier',
+            'share': 'Partager',
+            
+            // Features
+            'features_title': 'Fonctions',
+            'features_gradient': 'premium',
+            'features_subtitle': 'Tout pour la vérification professionnelle de textes',
             'feature1_title': 'Triple algorithme',
-            'feature1_desc': 'Perplexité, Burstiness et analyse de motifs pour une précision maximale de 99%',
-            'feature2_title': '5 langues européennes',
+            'feature1_desc': 'Perplexité, Burstiness et analyse de motifs pour 99% de précision',
+            'feature2_title': '5 langues',
             'feature2_desc': 'Anglais, ukrainien, polonais, allemand, français',
             'feature3_title': 'Analytique détaillée',
-            'feature3_desc': 'Rapport complet avec graphiques, statistiques et export PDF',
+            'feature3_desc': 'Rapport complet avec graphiques, statistiques et export',
+            
+            // Pricing
             'pricing_title': 'Choisissez votre',
+            'pricing_gradient': 'plan',
             'pricing_subtitle': 'Prix transparents sans frais cachés',
             'starter': 'Débutant',
             'basic_name': 'Basic',
-            'per_month': 'mois',
+            'month': 'mois',
             'basic_feature1': '1 000 caractères par analyse',
             'basic_feature2': '5 analyses par jour',
             'basic_feature3': 'Rapport de base',
@@ -911,8 +1833,8 @@
             'business_name': 'Business',
             'business_feature1': '5 000 caractères par analyse',
             'business_feature2': '50 analyses par jour',
-            'business_feature3': 'Rapport détaillé + PDF',
-            'business_feature4': 'API (100 requêtes/jour)',
+            'business_feature3': 'Rapport détaillé',
+            'business_feature4': 'API (100/jour)',
             'business_feature5': 'Support prioritaire',
             'corporate': 'Entreprise',
             'enterprise_name': 'Enterprise',
@@ -922,167 +1844,189 @@
             'enterprise_feature4': 'White Label',
             'enterprise_feature5': 'API Premium',
             'enterprise_feature6': 'Gestionnaire personnel',
-            'about_title': 'À propos de la société',
-            'about_text1': 'AI PROOF est une entreprise technologique ukrainienne spécialisée dans les détecteurs d\'IA pour les entreprises et l\'éducation. Notre mission est de rendre Internet plus propre et de protéger l\'intégrité académique.',
-            'about_text2': 'Fondée en 2024, l\'équipe d\'AI PROOF a réuni des développeurs expérimentés et des experts en IA de toute l\'Europe. Nous travaillons 24h/24 et 7j/7 pour fournir le meilleur service.',
+            
+            // About
+            'about_title': 'À propos',
+            'about_text1': 'AI PROOF est une entreprise technologique ukrainienne spécialisée dans les détecteurs d\'IA pour les entreprises et l\'éducation.',
+            'about_text2': 'Fondée en 2024, l\'équipe d\'AI PROOF réunit des développeurs expérimentés et des experts en IA de toute l\'Europe.',
+            
+            // Footer
             'footer_text': 'Détecteur d\'IA premium pour les entreprises',
             'product': 'Produit',
             'company': 'Société',
-            'privacy': 'Politique de confidentialité',
-            'terms': 'Conditions d\'utilisation',
+            'privacy': 'Confidentialité',
+            'terms': 'Conditions',
             'support': 'Support',
             'rights': 'Tous droits réservés',
-            'register_title': 'Inscription',
-            'agree': 'J\'accepte les conditions d\'utilisation',
-            'register_btn': "S'inscrire",
+            
+            // Modals
             'login_title': 'Connexion',
+            'register_title': 'Inscription',
+            'email': 'Email',
+            'password': 'Mot de passe',
+            'forgot_password': 'Mot de passe oublié?',
             'login_btn': 'Se connecter',
-            'privacy_title': 'Politique de confidentialité',
-            'privacy_text1': 'Nous ne collectons que les données nécessaires au service :',
-            'privacy_item1': 'Email - pour l\'identification et le support',
-            'privacy_item2': 'Textes à analyser - non conservés après traitement',
-            'privacy_item3': 'Données de paiement - traitées via des systèmes de paiement sécurisés',
-            'privacy_item4': 'Adresses IP - pour se protéger contre les abus',
-            'privacy_text2': 'Conformément au RGPD, vous avez le droit d\'accéder, de rectifier et de supprimer vos données.',
-            'terms_title': 'Conditions d\'utilisation',
-            'terms_text1': '1. En utilisant AI PROOF, vous acceptez ces conditions.',
-            'terms_text2': '2. Tous les textes sont traités de manière cryptée et ne sont pas stockés.',
-            'terms_text3': '3. Le paiement est effectué via des systèmes de paiement sécurisés.',
-            'terms_text4': '4. Nous ne sommes pas responsables des décisions prises sur la base des résultats de l\'analyse.',
-            'terms_text5': '5. L\'abonnement se renouvelle automatiquement sauf annulation avant la date d\'échéance.',
-            'legal_title': '⚠️ INFORMATIONS JURIDIQUES IMPORTANTES :',
-            'legal_line1': 'Les résultats de l\'analyse sont fournis "tels quels" sur la base d\'algorithmes d\'IA avec une précision de ~95-99%.',
-            'legal_line2': 'AI PROOF ne garantit pas une précision à 100% dans la détection du contenu IA.',
-            'legal_line3': 'Ce rapport est un outil d\'aide, pas un avis d\'expert.',
-            'legal_line4': 'L\'entreprise n\'est pas responsable des décisions prises sur la base de ce rapport.',
-            'legal_line5': 'Pour les décisions juridiquement significatives, il est recommandé de consulter des experts professionnels.',
-            'legal_auto': 'Ceci est un message automatique, merci de ne pas y répondre.'
+            'no_account': 'Pas de compte?',
+            'register_link': 'S\'inscrire',
+            'first_name': 'Prénom',
+            'last_name': 'Nom',
+            'confirm_password': 'Confirmer le mot de passe',
+            'password_hint': 'Minimum 6 caractères',
+            'register_btn': 'S\'inscrire',
+            
+            // Password recovery
+            'forgot_title': 'Récupération du mot de passe',
+            'step1_text': 'Entrez l\'email associé à votre compte',
+            'send_code': 'Envoyer le code',
+            'step2_text': 'Entrez le code à 6 chiffres envoyé par email',
+            'no_code': 'Pas de code?',
+            'resend': 'Renvoyer',
+            'verify': 'Vérifier',
+            'step3_text': 'Entrez le nouveau mot de passe',
+            'change_password': 'Changer le mot de passe',
+            'code_sent': 'Code envoyé!',
+            'password_changed': 'Mot de passe changé avec succès!',
+            
+            // Profile
+            'current_plan': 'Plan actuel',
+            'analyses_today': 'aujourd\'hui',
+            'expires': 'Expire le',
+            'change_plan': 'Changer de plan',
+            'history': 'Historique',
+            'settings': 'Paramètres',
+            'logout': 'Déconnexion',
+            
+            // Other
+            'cancel': 'Annuler',
+            'confirm': 'Confirmer',
+            'close': 'Fermer',
+            'per_month': '/mois',
+            'change_plan_title': 'Changer de plan'
         }
     };
 
-    // Функція зміни мови
+    // ========== МОВИ ==========
     function changeLanguage(lang) {
-        // Змінюємо всі елементи з data-key
-        document.querySelectorAll('[data-key]').forEach(element => {
-            const key = element.getAttribute('data-key');
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
             if (translations[lang] && translations[lang][key]) {
-                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                    element.placeholder = translations[lang][key];
-                } else {
-                    element.textContent = translations[lang][key];
-                }
+                el.textContent = translations[lang][key];
             }
         });
-
-        // Зберігаємо вибрану мову
         localStorage.setItem('lang', lang);
     }
 
-    // Обробники кнопок мов
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const lang = this.dataset.lang;
-            
-            // Оновлюємо активний клас
             document.querySelectorAll('.lang-btn').forEach(b => {
                 b.classList.remove('border-2', 'border-accent');
                 b.classList.add('border', 'border-gray-600');
             });
             this.classList.remove('border', 'border-gray-600');
             this.classList.add('border-2', 'border-accent');
-            
-            // Змінюємо мову
             changeLanguage(lang);
         });
     });
 
-    // Завантажуємо збережену мову
-    const savedLang = localStorage.getItem('lang') || 'en';
-    if (savedLang) {
-        changeLanguage(savedLang);
-        const btn = document.querySelector(`[data-lang="${savedLang}"]`);
-        if (btn) {
-            document.querySelectorAll('.lang-btn').forEach(b => {
-                b.classList.remove('border-2', 'border-accent');
-                b.classList.add('border', 'border-gray-600');
-            });
-            btn.classList.remove('border', 'border-gray-600');
-            btn.classList.add('border-2', 'border-accent');
+    // Завантаження збереженої мови
+    const savedLang = localStorage.getItem('lang') || 'uk';
+    changeLanguage(savedLang);
+    const savedBtn = document.querySelector(`.lang-btn[data-lang="${savedLang}"]`);
+    if (savedBtn) {
+        document.querySelectorAll('.lang-btn').forEach(b => {
+            b.classList.remove('border-2', 'border-accent');
+            b.classList.add('border', 'border-gray-600');
+        });
+        savedBtn.classList.remove('border', 'border-gray-600');
+        savedBtn.classList.add('border-2', 'border-accent');
+    }
+
+    // ========== ПЕРЕГЛЯД ПАРОЛЮ ==========
+    window.togglePasswordVisibility = function(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+
+    // ========== АВТОРИЗАЦІЯ ==========
+    function checkAuth() {
+        const user = localStorage.getItem('currentUser');
+        if (user) {
+            currentUser = JSON.parse(user);
+            document.getElementById('authButtons').classList.add('hidden');
+            document.getElementById('profileSection').classList.remove('hidden');
+            
+            const name = currentUser.name || 'User';
+            document.getElementById('profileInitial').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('profileName').textContent = name;
+            document.getElementById('profileEmail').textContent = currentUser.email;
+            
+            const plan = plans[currentUser.plan || 'basic'];
+            document.getElementById('currentPlan').textContent = plan.name;
+            document.getElementById('planPrice').textContent = '$' + plan.price;
+            
+            const used = currentUser.analysesToday || 0;
+            const limit = plan.limit === Infinity ? '∞' : plan.limit;
+            document.getElementById('analysesUsed').textContent = used;
+            document.getElementById('analysesLimit').textContent = limit;
+            
+            if (plan.limit !== Infinity) {
+                const percent = (used / plan.limit) * 100;
+                document.getElementById('analysesProgress').style.width = percent + '%';
+            }
+            
+            if (currentUser.expires) {
+                document.getElementById('planExpires').textContent = new Date(currentUser.expires).toLocaleDateString();
+            }
+            
+            document.getElementById('planIndicator').innerHTML = `
+                <i class="fas fa-crown text-gold mr-1"></i>
+                ${plan.name}
+            `;
+            document.getElementById('analysesLeft').classList.remove('hidden');
+            document.getElementById('analysesLeftCount').textContent = limit === Infinity ? '∞' : (limit - used);
         }
     }
 
-    // ========== ЛІЧИЛЬНИК СИМВОЛІВ ==========
-    document.getElementById('textInput')?.addEventListener('input', function() {
-        document.getElementById('charCount').textContent = this.value.length + '/10000';
-    });
-
-    // ========== АНАЛІЗ ТЕКСТУ ==========
-    document.getElementById('analyzeBtn')?.addEventListener('click', () => {
-        const text = document.getElementById('textInput').value;
-        if (!text) {
-            alert('Please enter text for analysis');
-            return;
-        }
-
-        // Простий алгоритм для демонстрації
-        let hash = 0;
-        for (let i = 0; i < Math.min(text.length, 100); i++) {
-            hash = ((hash << 5) - hash) + text.charCodeAt(i);
-            hash = hash & hash;
-        }
-        const percent = Math.abs(hash % 70) + 15;
-        
-        const currentLang = localStorage.getItem('lang') || 'en';
-        const t = translations[currentLang];
-        
-        alert(`${t.analyze}: ${percent}%`);
-    });
-
     // ========== МОДАЛЬНІ ВІКНА ==========
-    document.getElementById('registerBtn')?.addEventListener('click', () => {
-        document.getElementById('registerModal').classList.add('flex');
-        document.getElementById('registerModal').classList.remove('hidden');
-    });
+    window.showLogin = function() {
+        closeModals();
+        document.getElementById('loginModal').classList.add('active');
+    };
 
-    document.getElementById('loginBtn')?.addEventListener('click', () => {
-        document.getElementById('loginModal').classList.add('flex');
-        document.getElementById('loginModal').classList.remove('hidden');
-    });
+    window.showRegister = function() {
+        closeModals();
+        document.getElementById('registerModal').classList.add('active');
+    };
 
-    document.getElementById('closeRegisterModal')?.addEventListener('click', () => {
-        document.getElementById('registerModal').classList.remove('flex');
-        document.getElementById('registerModal').classList.add('hidden');
-    });
+    window.showForgotPassword = function() {
+        closeModals();
+        document.getElementById('forgotModal').classList.add('active');
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.add('hidden');
+    };
 
-    document.getElementById('closeLoginModal')?.addEventListener('click', () => {
-        document.getElementById('loginModal').classList.remove('flex');
-        document.getElementById('loginModal').classList.add('hidden');
-    });
-
-    document.getElementById('privacyLink')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('privacyModal').classList.add('flex');
-        document.getElementById('privacyModal').classList.remove('hidden');
-    });
-
-    document.getElementById('termsLink')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('termsModal').classList.add('flex');
-        document.getElementById('termsModal').classList.remove('hidden');
-    });
-
-    document.querySelectorAll('.closeModal').forEach(btn => {
-        btn.addEventListener('click', function() {
-            this.closest('.fixed').classList.remove('flex');
-            this.closest('.fixed').classList.add('hidden');
+    window.closeModals = function() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.remove('active');
         });
-    });
+    };
 
-    document.querySelectorAll('.fixed').forEach(modal => {
+    document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.classList.remove('flex');
-                modal.classList.add('hidden');
+                closeModals();
             }
         });
     });
@@ -1090,61 +2034,417 @@
     // ========== РЕЄСТРАЦІЯ ==========
     document.getElementById('registerForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
+        
+        const name = document.getElementById('regName').value;
+        const lastName = document.getElementById('regLastName').value;
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
         const confirm = document.getElementById('regConfirm').value;
-        const agree = document.getElementById('regAgree').checked;
-
-        if (!agree) {
-            alert('Please agree to the terms of use');
-            return;
-        }
-
+        
         if (password !== confirm) {
-            alert('Passwords do not match');
+            alert(translations[savedLang]['password_mismatch'] || 'Паролі не співпадають');
             return;
         }
-
+        
+        if (password.length < 6) {
+            alert(translations[savedLang]['password_short'] || 'Пароль має містити хоча б 6 символів');
+            return;
+        }
+        
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         if (users.find(u => u.email === email)) {
-            alert('User with this email already exists');
+            alert(translations[savedLang]['user_exists'] || 'Користувач з таким email вже існує');
             return;
         }
-
-        users.push({ 
-            email, 
-            password: btoa(password),
-            plan: null,
-            expires: null,
-            registered: new Date().toISOString()
-        });
         
+        const newUser = {
+            name: name + ' ' + lastName,
+            email: email,
+            password: btoa(password),
+            plan: 'basic',
+            analysesToday: 0,
+            registered: new Date().toISOString(),
+            expires: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
+            history: []
+        };
+        
+        users.push(newUser);
         localStorage.setItem('users', JSON.stringify(users));
         
-        alert('Registration successful! You can now login.');
+        currentUser = newUser;
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
         
-        document.getElementById('registerModal').classList.remove('flex');
-        document.getElementById('registerModal').classList.add('hidden');
+        checkAuth();
+        closeModals();
+        showSuccessToast(translations[savedLang]['register_success'] || 'Реєстрація успішна!');
     });
 
     // ========== ВХІД ==========
     document.getElementById('loginForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
+        
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
-
+        
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         const user = users.find(u => u.email === email && u.password === btoa(password));
-
+        
         if (user) {
+            currentUser = user;
             localStorage.setItem('currentUser', JSON.stringify(user));
-            alert('Login successful!');
-            document.getElementById('loginModal').classList.remove('flex');
-            document.getElementById('loginModal').classList.add('hidden');
+            checkAuth();
+            closeModals();
+            showSuccessToast(translations[savedLang]['login_success'] || 'Вхід успішний!');
         } else {
-            alert('Invalid email or password');
+            alert(translations[savedLang]['invalid_credentials'] || 'Невірний email або пароль');
         }
     });
+
+    // ========== ВІДНОВЛЕННЯ ПАРОЛЮ ==========
+    window.sendResetCode = function() {
+        const email = document.getElementById('resetEmail').value;
+        if (!email) {
+            alert(translations[savedLang]['enter_email'] || 'Введіть email');
+            return;
+        }
+        
+        resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+        localStorage.setItem('resetEmail', email);
+        
+        console.log('🔐 КОД ВІДНОВЛЕННЯ:', resetCode);
+        alert(translations[savedLang]['code_sent'] + ' ' + resetCode);
+        
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+    };
+
+    window.moveToNext = function(input, index) {
+        if (input.value.length === 1) {
+            input.classList.add('filled');
+            if (index < 5) {
+                document.querySelectorAll('.code-input')[index + 1].focus();
+            }
+        }
+        
+        const allFilled = Array.from(document.querySelectorAll('.code-input')).every(i => i.value.length === 1);
+        if (allFilled) {
+            verifyCode();
+        }
+    };
+
+    window.verifyCode = function() {
+        const inputs = document.querySelectorAll('.code-input');
+        let code = '';
+        inputs.forEach(input => code += input.value);
+        
+        if (code === resetCode) {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+        } else {
+            alert(translations[savedLang]['invalid_code'] || 'Невірний код');
+        }
+    };
+
+    window.changePassword = function() {
+        const newPass = document.getElementById('newPassword').value;
+        const confirmPass = document.getElementById('confirmNewPassword').value;
+        
+        if (!newPass || !confirmPass) {
+            alert(translations[savedLang]['fill_fields'] || 'Заповніть всі поля');
+            return;
+        }
+        
+        if (newPass !== confirmPass) {
+            alert(translations[savedLang]['password_mismatch'] || 'Паролі не співпадають');
+            return;
+        }
+        
+        if (newPass.length < 6) {
+            alert(translations[savedLang]['password_short'] || 'Пароль має містити хоча б 6 символів');
+            return;
+        }
+        
+        const email = localStorage.getItem('resetEmail');
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const userIndex = users.findIndex(u => u.email === email);
+        
+        if (userIndex !== -1) {
+            users[userIndex].password = btoa(newPass);
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.removeItem('resetEmail');
+            
+            closeModals();
+            showSuccessToast(translations[savedLang]['password_changed']);
+            
+            setTimeout(() => {
+                showLogin();
+            }, 2500);
+        }
+    };
+
+    // ========== ПРОФІЛЬ ==========
+    document.getElementById('profileAvatar')?.addEventListener('click', () => {
+        document.getElementById('profileDropdown').classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#profileSection')) {
+            document.getElementById('profileDropdown').classList.remove('active');
+        }
+    });
+
+    window.logout = function() {
+        currentUser = null;
+        localStorage.removeItem('currentUser');
+        document.getElementById('authButtons').classList.remove('hidden');
+        document.getElementById('profileSection').classList.add('hidden');
+        document.getElementById('profileDropdown').classList.remove('active');
+        document.getElementById('planIndicator').innerHTML = '<i class="fas fa-crown text-gold mr-1"></i>' + (translations[savedLang]['free_plan'] || 'Безкоштовно');
+        document.getElementById('analysesLeft').classList.add('hidden');
+    };
+
+    // ========== АНАЛІЗ ТЕКСТУ ==========
+    document.getElementById('analyzeBtn')?.addEventListener('click', () => {
+        const text = document.getElementById('textInput').value;
+        if (!text) {
+            alert(translations[savedLang]['enter_text'] || 'Введіть текст для аналізу');
+            return;
+        }
+        
+        if (currentUser) {
+            const plan = plans[currentUser.plan || 'basic'];
+            
+            if (plan.limit !== Infinity && (currentUser.analysesToday || 0) >= plan.limit) {
+                alert(translations[savedLang]['limit_reached'] || 'Ліміт аналізів на сьогодні вичерпано');
+                return;
+            }
+            
+            if (text.length > plan.chars) {
+                alert(translations[savedLang]['chars_limit'] + ' ' + plan.chars);
+                return;
+            }
+        } else if (text.length > 1000) {
+            alert(translations[savedLang]['free_limit'] || 'Безкоштовно тільки перші 1000 символів');
+            return;
+        }
+        
+        performAnalysis(text);
+    });
+
+    function performAnalysis(text) {
+        let hash = 0;
+        for (let i = 0; i < Math.min(text.length, 100); i++) {
+            hash = ((hash << 5) - hash) + text.charCodeAt(i);
+            hash = hash & hash;
+        }
+        
+        const probability = Math.abs(hash % 70) + 15;
+        
+        const words = text.split(/\s+/).length;
+        const chars = text.length;
+        const sentences = (text.match(/[.!?]+/g) || []).length || 1;
+        const readingTime = (words / 200).toFixed(1);
+        
+        const perplexity = 30 + Math.abs(hash % 50);
+        const burstiness = 20 + Math.abs((hash * 2) % 60);
+        const pattern = 25 + Math.abs((hash * 3) % 55);
+        
+        document.getElementById('aiProbability').textContent = probability;
+        document.getElementById('wordCount').textContent = words;
+        document.getElementById('charCount2').textContent = chars;
+        document.getElementById('sentenceCount').textContent = sentences;
+        document.getElementById('readingTime').textContent = readingTime;
+        
+        document.getElementById('perplexityValue').textContent = perplexity + '%';
+        document.getElementById('perplexityBar').style.width = perplexity + '%';
+        
+        document.getElementById('burstinessValue').textContent = burstiness + '%';
+        document.getElementById('burstinessBar').style.width = burstiness + '%';
+        
+        document.getElementById('patternValue').textContent = pattern + '%';
+        document.getElementById('patternBar').style.width = pattern + '%';
+        
+        let conclusion = '';
+        if (probability < 30) conclusion = translations[savedLang]['likely_human'] || 'Ймовірно написано людиною';
+        else if (probability < 60) conclusion = translations[savedLang]['possibly_ai'] || 'Можливо згенеровано AI';
+        else conclusion = translations[savedLang]['likely_ai'] || 'Ймовірно згенеровано AI';
+        document.getElementById('conclusionText').textContent = conclusion;
+        
+        document.getElementById('analysisTimestamp').textContent = new Date().toLocaleString();
+        document.getElementById('resultSection').classList.remove('hidden');
+        
+        if (currentUser) {
+            const history = currentUser.history || [];
+            history.unshift({
+                date: new Date().toLocaleString(),
+                result: probability,
+                text: text.substring(0, 50) + '...',
+                conclusion: conclusion
+            });
+            currentUser.history = history.slice(0, 20);
+            
+            currentUser.analysesToday = (currentUser.analysesToday || 0) + 1;
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const index = users.findIndex(u => u.email === currentUser.email);
+            if (index !== -1) {
+                users[index] = currentUser;
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+            
+            checkAuth();
+        }
+        
+        setTimeout(() => {
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    }
+
+    // ========== УСПІШНЕ ПОВІДОМЛЕННЯ ==========
+    function showSuccessToast(message) {
+        const toast = document.getElementById('successToast');
+        document.getElementById('successMessage').textContent = message;
+        toast.style.display = 'block';
+        
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => {
+                toast.style.display = 'none';
+                toast.classList.remove('fade-out');
+            }, 300);
+        }, 2000);
+    }
+
+    // ========== ІСТОРІЯ ==========
+    window.showHistory = function() {
+        if (!currentUser) return;
+        
+        const history = currentUser.history || [];
+        const list = document.getElementById('historyList');
+        
+        if (history.length === 0) {
+            list.innerHTML = '<p class="text-gray-400 text-center py-4">' + (translations[savedLang]['no_history'] || 'Історія порожня') + '</p>';
+        } else {
+            list.innerHTML = history.map(item => `
+                <div class="bg-gray-900 p-3 rounded-lg hover:bg-gray-800 transition">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="text-sm">${item.text}</p>
+                            <p class="text-xs text-gray-400 mt-1">${item.date}</p>
+                        </div>
+                        <div class="text-right ml-3">
+                            <span class="text-lg font-bold text-accent">${item.result}%</span>
+                            <p class="text-xs text-gray-400">${item.conclusion}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        document.getElementById('historyModal').classList.add('active');
+    };
+
+    // ========== ЗМІНА ПЛАНУ ==========
+    window.showChangePlanModal = function() {
+        selectedNewPlan = null;
+        document.getElementById('currentPlanName').textContent = plans[currentUser.plan || 'basic'].name;
+        document.getElementById('currentPlanPrice').textContent = plans[currentUser.plan || 'basic'].price;
+        document.getElementById('planChangeDiff').textContent = '';
+        document.getElementById('changePlanModal').classList.add('active');
+    };
+
+    window.selectPlan = function(plan) {
+        document.querySelectorAll('.plan-card').forEach(el => {
+            el.classList.remove('border-accent', 'border-2');
+            el.classList.add('border', 'border-gray-700');
+        });
+        
+        event.currentTarget.classList.remove('border', 'border-gray-700');
+        event.currentTarget.classList.add('border-2', 'border-accent');
+        
+        selectedNewPlan = plan;
+        
+        const currentPrice = plans[currentUser.plan || 'basic'].price;
+        const newPrice = plans[plan].price;
+        const diff = newPrice - currentPrice;
+        
+        if (diff > 0) {
+            document.getElementById('planChangeDiff').innerHTML = `<span class="text-gold">+$${diff}/міс</span>`;
+        } else if (diff < 0) {
+            document.getElementById('planChangeDiff').innerHTML = `<span class="text-success">-$${-diff}/міс</span>`;
+        } else {
+            document.getElementById('planChangeDiff').innerHTML = '';
+        }
+    };
+
+    window.confirmPlanChange = function() {
+        if (!selectedNewPlan) {
+            alert(translations[savedLang]['select_plan'] || 'Оберіть план');
+            return;
+        }
+        
+        const oldPlan = currentUser.plan;
+        const newPlan = selectedNewPlan;
+        const diff = plans[newPlan].price - plans[oldPlan].price;
+        
+        let message = '';
+        if (diff > 0) {
+            message = (translations[savedLang]['upgrade_confirm'] || 'Апгрейд буде коштувати +$') + diff + '/міс. Продовжити?';
+        } else if (diff < 0) {
+            message = (translations[savedLang]['downgrade_confirm'] || 'Даунгрейд зменшить плату на $') + (-diff) + '/міс. Продовжити?';
+        } else {
+            message = translations[savedLang]['change_confirm'] || 'Змінити план?';
+        }
+        
+        if (confirm(message)) {
+            currentUser.plan = newPlan;
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const index = users.findIndex(u => u.email === currentUser.email);
+            if (index !== -1) {
+                users[index] = currentUser;
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+            
+            checkAuth();
+            closeModals();
+            showSuccessToast(translations[savedLang]['plan_changed'] || 'План успішно змінено!');
+        }
+    };
+
+    // ========== ЛІЧИЛЬНИК СИМВОЛІВ ==========
+    document.getElementById('textInput')?.addEventListener('input', function() {
+        document.getElementById('charCount').textContent = this.value.length + '/10000';
+    });
+
+    // ========== ДОДАТКОВІ ФУНКЦІЇ ==========
+    window.showSettings = function() {
+        alert(translations[savedLang]['settings_coming'] || 'Налаштування профілю (в розробці)');
+    };
+
+    window.saveReport = function() {
+        showSuccessToast(translations[savedLang]['report_saved'] || 'Звіт збережено в історію');
+    };
+
+    window.copyReport = function() {
+        const text = document.getElementById('textInput').value;
+        navigator.clipboard.writeText(text).then(() => {
+            showSuccessToast(translations[savedLang]['copied'] || 'Скопійовано!');
+        });
+    };
+
+    window.shareReport = function() {
+        showSuccessToast(translations[savedLang]['share_coming'] || 'Функція поділитись в розробці');
+    };
+
+    window.scrollToTop = function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Ініціалізація
+    checkAuth();
 </script>
 </body>
 </html>
